@@ -1,0 +1,6 @@
+DerivedData/
+*.xcodeproj
+test
+rl.d*
+rl
+*.txt
