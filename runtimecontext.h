@@ -4,6 +4,7 @@
 #include "config.h"
 #include "creature.h"
 #include "arrayList.h"
+#include "player.h"
 
 // This is the context that will be passed to most functions
 typedef struct _RL_RTCONTEXT {
@@ -11,6 +12,7 @@ typedef struct _RL_RTCONTEXT {
     RL_Config *conf;
     ArrayList *creatures;
     char **map;
+    RL_Player* player;
 } RL_RTContext;
 
 RL_RTContext *RL_CreateRTContext();

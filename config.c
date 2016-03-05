@@ -12,6 +12,8 @@ RL_Config* RL_LoadConfig(const char *configFilePath)
     c->gen = gen;
     c->width = tb_width();
     c->height = tb_height();
+    c->rbarwidth = 10;
+    c->bbarwidth = 5;
     fclose(f);
     return c;
 }

@@ -31,7 +31,7 @@ void RL_GenerateMap(RL_RTContext *rtc)
 {
     int i = 0;
     int j = 0;
-    char tiles[] = " .,T'!o";
+    char tiles[] = "T., 'o!";
     int numTiles = strnlen(tiles,50);
     srand(rtc->conf->gen);
     for (i = 0 ; i < rtc->conf->width; i++)

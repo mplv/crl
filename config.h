@@ -10,6 +10,8 @@ typedef struct _RL_Config {
     // include key bindings here?
     int width;
     int height;
+    int rbarwidth;
+    int bbarwidth;
     int gen;
     
 } RL_Config;

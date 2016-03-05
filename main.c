@@ -7,6 +7,7 @@
 #include "map.h"
 #include "draw.h"
 #include "arraylist.h"
+#include "player.h"
 
 int main (int argc, const char *argv[])
 {
@@ -33,6 +34,7 @@ int main (int argc, const char *argv[])
     x = tb_width();
     y = tb_height();
     RL_GenerateMap(rtc);
+    rtc->player = RL_NewPlayer();
     tb_clear();
     RL_Draw(rtc);
     tb_present();
@@ -42,6 +44,22 @@ int main (int argc, const char *argv[])
             if (ev.key == TB_KEY_CTRL_Q) {
                 running = 0;
             }
+                if (ev.ch != 0) {
+                    switch (ev.ch) {
+                        case 'w':
+                            rtc->player->y > 0 ? rtc->player->y--:0;
+                            break;
+                        case 'a':
+                            rtc->player->x > 0 ? rtc->player->x--:0;
+                            break;
+                        case 's':
+                            rtc->player->y < rtc->conf->height - rtc->conf->bbarwidth - 1? rtc->player->y++:rtc->conf->height - rtc->conf->bbarwidth - 1;
+                            break;
+                        case 'd':
+                            rtc->player->x < rtc->conf->width - rtc->conf->rbarwidth - 1? rtc->player->x++:rtc->conf->width - rtc->conf->rbarwidth - 1;
+                            break;
+                    }
+                }
             break;
         case TB_EVENT_RESIZE:
             tb_clear();
@@ -55,6 +73,7 @@ int main (int argc, const char *argv[])
         RL_Draw(rtc);
         tb_present();
     }
+    RL_DestroyPlayer(rtc->player);
     RL_DestroyMap(rtc, tb_width());
     RL_FreeCreaturesList(rtc->creatures);
     AL_Destroy(rtc->creatures);
