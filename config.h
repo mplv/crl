@@ -13,6 +13,8 @@ typedef struct _RL_Config {
     int rbarwidth;
     int bbarwidth;
     int gen;
+    int mapsizex;
+    int mapsizey;
     
 } RL_Config;
 

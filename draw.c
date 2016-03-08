@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "draw.h"
+#include "debug.h"
 
 void RL_DrawLowerBar(RL_RTContext *rtc)
 {
@@ -18,6 +19,14 @@ void RL_DrawLowerBar(RL_RTContext *rtc)
     {
         tb_change_cell(i,rtc->conf->height - rtc->conf->bbarwidth, '-', TB_DEFAULT, TB_DEFAULT);
     }
+    j = rtc->conf->height - rtc->conf->bbarwidth + 1;
+    RL_DebugMessage *dm = RL_GetLastDebugMessage();
+    if (dm) {
+        for (i = 0; i < 80; i++) {
+            tb_change_cell(i,j,dm->debug_message[i], TB_DEFAULT, TB_DEFAULT);
+        }
+    }
+    
 }
 
 void RL_DrawPlayerHealth(RL_RTContext *rtc)
@@ -30,8 +39,8 @@ void RL_DrawPlayerHealth(RL_RTContext *rtc)
     char php[6] = {0};
     char pmp[6] = {0};
     
-    strncpy(php,full, (int)(5.0 * (((double)rtc->player->hp) / ((double)rtc->player->maxHp))));
-    strncpy(pmp,full, (int)(5.0 * (((double)rtc->player->mp) / ((double)rtc->player->maxMp))));
+    strncpy(php,full, (int)(5.0 * (((double)rtc->player->ent->hp) / ((double)rtc->player->ent->maxHp))));
+    strncpy(pmp,full, (int)(5.0 * (((double)rtc->player->ent->mp) / ((double)rtc->player->ent->maxMp))));
     
     
     int delta = rtc->conf->width - rtc->conf->rbarwidth +1;
@@ -81,7 +90,7 @@ void RL_DrawPlayerHealth(RL_RTContext *rtc)
             }
         }
     }
-
+    
 }
 
 void RL_DrawRightBar(RL_RTContext *rtc)
@@ -111,5 +120,5 @@ void RL_Draw(RL_RTContext *rtc)
             tb_change_cell(i,j, rtc->map[i][j], TB_DEFAULT, TB_DEFAULT);
         }
     }
-    tb_change_cell(rtc->player->x,rtc->player->y, '@', TB_DEFAULT, TB_DEFAULT);
+    tb_change_cell(rtc->player->ent->x,rtc->player->ent->y, '@', TB_DEFAULT, TB_DEFAULT);
 }

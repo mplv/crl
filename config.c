@@ -14,6 +14,8 @@ RL_Config* RL_LoadConfig(const char *configFilePath)
     c->height = tb_height();
     c->rbarwidth = 10;
     c->bbarwidth = 5;
+    c->mapsizex = c->width - c->rbarwidth;
+    c->mapsizey = c->height - c->bbarwidth;
     fclose(f);
     return c;
 }

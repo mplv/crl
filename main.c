@@ -8,6 +8,7 @@
 #include "draw.h"
 #include "arraylist.h"
 #include "player.h"
+#include "debug.h"
 
 int main (int argc, const char *argv[])
 {
@@ -35,9 +36,12 @@ int main (int argc, const char *argv[])
     y = tb_height();
     RL_GenerateMap(rtc);
     rtc->player = RL_NewPlayer();
+    RL_CreateDebug();
     tb_clear();
     RL_Draw(rtc);
     tb_present();
+    int valid = 0;
+    int dir = 0;
     while (running && tb_poll_event(&ev)) {
         switch (ev.type) {
         case TB_EVENT_KEY:
@@ -47,17 +51,25 @@ int main (int argc, const char *argv[])
                 if (ev.ch != 0) {
                     switch (ev.ch) {
                         case 'w':
-                            rtc->player->y > 0 ? rtc->player->y--:0;
+                            valid = RL_ValidMove(rtc, rtc->player->ent, 0);
+                            dir = 0;
                             break;
                         case 'a':
-                            rtc->player->x > 0 ? rtc->player->x--:0;
+                            valid = RL_ValidMove(rtc, rtc->player->ent, 2);
+                            dir = 2;
                             break;
                         case 's':
-                            rtc->player->y < rtc->conf->height - rtc->conf->bbarwidth - 1? rtc->player->y++:rtc->conf->height - rtc->conf->bbarwidth - 1;
+                            valid = RL_ValidMove(rtc, rtc->player->ent, 1);
+                            dir = 1;
                             break;
                         case 'd':
-                            rtc->player->x < rtc->conf->width - rtc->conf->rbarwidth - 1? rtc->player->x++:rtc->conf->width - rtc->conf->rbarwidth - 1;
+                            valid = RL_ValidMove(rtc, rtc->player->ent, 3);
+                            dir = 3;
                             break;
+                    }
+                    if (valid) {
+                        RL_EntityMove(rtc->player->ent, dir, rtc->conf->width - rtc->conf->rbarwidth - 1, rtc->conf->height - rtc->conf->bbarwidth - 1);
+                        
                     }
                 }
             break;
@@ -73,6 +85,7 @@ int main (int argc, const char *argv[])
         RL_Draw(rtc);
         tb_present();
     }
+    RL_DestroyDebug();
     RL_DestroyPlayer(rtc->player);
     RL_DestroyMap(rtc, tb_width());
     RL_FreeCreaturesList(rtc->creatures);
