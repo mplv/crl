@@ -1,7 +1,7 @@
 #ifndef debug_h
 #define debug_h
 
-#include "arraylist.h"
+#include "arraylist/arraylist.h"
 
 typedef struct {
     ArrayList *l;

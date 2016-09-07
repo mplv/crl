@@ -2,8 +2,8 @@
 #define player_h
 
 
-#include "arraylist.h"
-#include "entity.h"
+#include "arraylist/arraylist.h"
+#include "entity/entity.h"
 
 typedef struct {
     RL_Entity *ent;

@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h> 
+#include <dirent.h>
 #include <string.h>
-#include <termbox.h>
-#include "config.h"
+#include "config/config.h"
 #include "creature.h"
-#include "arraylist.h"
+#include "arraylist/arraylist.h"
 
 // print out the creature for memory corruption or loading issues
 void RL_PrintCreature(RL_Creature *c)
@@ -18,7 +17,7 @@ void RL_PrintCreature(RL_Creature *c)
     printf("lck: %d\n\t",c->lck);
     printf("droptable: %d\n\t",c->droptable);
     printf("climate: %c\n\t",c->climate);
-    printf("r,g,b: %d,%d,%d\n",c->r,c->g,c->b);
+    printf("r,g,b: %u,%u,%u\n",c->r,c->g,c->b);
 }
 
 // load the creature from a file
@@ -30,6 +29,10 @@ RL_Creature* RL_LoadCreatureDef(char *filestr)
     f = fopen(filestr, "r");
     if (f)
     {
+		// create locations for the colors
+		unsigned int r;
+		unsigned int g;
+		unsigned int b;
         // using the data in the file load the creature
         fscanf(f, "%s\n",c->name);
         fscanf(f, "pre: %d\n",&c->pre);
@@ -39,10 +42,13 @@ RL_Creature* RL_LoadCreatureDef(char *filestr)
         fscanf(f, "lck: %d\n",&c->lck);
         fscanf(f, "droptable: %d\n",&c->droptable);
         fscanf(f, "climate: %c\n",&c->climate);
-        fscanf(f, "color: %d,%d,%d\n",&c->r,&c->g,&c->b);
+        fscanf(f, "color: %u,%u,%u\n",&r,&g,&b);
+		c->r = r;
+		c->g = g;
+		c->b = b;
         // do things is pre is > version
     }
-    else 
+    else
     {
         free(c);
         fclose(f);
@@ -81,6 +87,10 @@ ArrayList* RL_LoadAllCreatures(RL_Config *c)
                 {
                     AL_Add(l,creature);
                 }
+				else {
+					closedir(d);
+					return NULL;
+				}
             }
         }
         // clean up
@@ -98,5 +108,5 @@ void RL_FreeCreaturesList(ArrayList *l)
         RL_Creature *c = (RL_Creature*)AL_RemoveLast(l);
         free(c);
     }
+	AL_Destroy(l);
 }
-

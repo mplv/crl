@@ -1,13 +1,15 @@
 #include <stdlib.h>
 #include "player.h"
 #include "item.h"
-#include "entity.h"
-#include "arraylist.h"
+#include "entity/entity.h"
+#include "arraylist/arraylist.h"
 
 RL_Player* RL_NewPlayer()
 {
     RL_Player *player = calloc(1, sizeof(RL_Player));
     player->ent = RL_NewEntity();
+	player->ent->x = 0;
+	player->ent->y = 0;
     player->inventory = AL_New();
     return player;
 }

@@ -1,18 +1,24 @@
 #ifndef RL_RUNTIMECONTEXT
 #define RL_RUNTIMECONTEXT
 
-#include "config.h"
-#include "creature.h"
-#include "arrayList.h"
-#include "player.h"
+#include "generator/generator.h"
+#include "config/config.h"
+#include "arraylist/arraylist.h"
+#include "entity/player/player.h"
+#include "textures/textures.h"
+#include "map/map.h"
 
 // This is the context that will be passed to most functions
+// container for most of the roguelike state
 typedef struct _RL_RTCONTEXT {
     // config from the config file
     RL_Config *conf;
     ArrayList *creatures;
-    char **map;
+	RL_MapGeneratorHolder* mapGenHolder;
+	RL_Map *map;
+	Textures *textures;
     RL_Player* player;
+	RL_Generator* gen;
 } RL_RTContext;
 
 RL_RTContext *RL_CreateRTContext();

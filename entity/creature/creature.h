@@ -1,8 +1,8 @@
 #ifndef RL_CREATURE
 #define RL_CREATURE
 
-#include "config.h"
-#include "arraylist.h"
+#include "config/config.h"
+#include "arraylist/arraylist.h"
 
 typedef struct {
     // max name is 20 chars long
@@ -19,7 +19,7 @@ typedef struct {
     // which climates this mob spawns in
     char climate;
     // color of the text for the sprite
-    int r,g,b;
+    unsigned char r,g,b;
 } RL_Creature;
 
 void RL_FreeCreaturesList(ArrayList *l);

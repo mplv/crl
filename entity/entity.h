@@ -12,6 +12,8 @@ typedef struct {
     int evn;
     int lck;
     int mst;
+	// color of the text for the sprite
+    unsigned char r,g,b;
 }RL_Entity;
 
 RL_Entity* RL_NewEntity();

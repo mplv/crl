@@ -3,7 +3,7 @@
 
 void AL_Resize(ArrayList *l)
 {
-    // TODO workds but could be shortened
+    // TODO works but could be shortened
     // make a copy of the pointer
     ArrayList *tmp = l;
     // create a new arraylist that has twice the cap
@@ -24,9 +24,11 @@ void AL_Resize(ArrayList *l)
     l->cap = new->cap;
     l->arr = new->arr;
     l->addPos = new->addPos;
-    free(new);
+	free(new);
 }
 
+// Remember that you must remove all elements before using this function
+// or it does nothing and you leak a bunch of data
 void AL_Destroy(ArrayList *l)
 {
     // as long as there are 0 elements
@@ -81,7 +83,7 @@ void AL_Add(ArrayList *l, void* data)
     // now add it
     l->arr[l->addPos] = data;
     l->addPos += 1;
-    
+
 }
 
 void* AL_RemoveLast(ArrayList *l)
@@ -109,7 +111,7 @@ void* AL_Remove(ArrayList *l, int pos)
     if (pos < l->cap && pos < l->addPos) {
         // create a copy of the data pointer
         void *data = l->arr[pos];
-        // for each element after move the element down by one
+        // for each element after, move the element down by one
         int i = pos;
         for (i = pos; i < l->addPos; i++) {
             // if the next position is less than the cap
@@ -125,4 +127,3 @@ void* AL_Remove(ArrayList *l, int pos)
     }
     return NULL;
 }
-

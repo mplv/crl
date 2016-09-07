@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "entity.h"
-#include "debug.h"
+#include "debug/debug.h"
 
 RL_Entity* RL_NewEntity()
 {
@@ -20,8 +20,6 @@ void RL_DestroyEntity(RL_Entity *ent)
 
 void RL_EntityMove(RL_Entity *ent, int dir, int maxX, int maxY)
 {
-    char message[80];
-    
     switch (dir) {
         case 0: // w
             ent->y -= 1;
@@ -38,18 +36,14 @@ void RL_EntityMove(RL_Entity *ent, int dir, int maxX, int maxY)
     }
     ent->x = ent->x < 0 ? 0 : ent->x;
     ent->y = ent->y < 0 ? 0 : ent->y;
-    
+
     if (ent->x > maxX)
     {
         ent->x = maxX;
     }
-    
+
     if (ent->y > maxY)
     {
         ent->y = maxY;
     }
-    
-    snprintf(message, 80, "char at: %d, %d", ent->x, ent->y);
-    RL_AddDebugMessage(message);
-    
 }

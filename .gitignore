@@ -4,3 +4,9 @@ test
 rl.d*
 rl
 *.txt
+.gcc-flags.json
+Makefile
+*.h.gch
+*.o
+img/
+core
