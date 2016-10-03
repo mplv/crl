@@ -1,9 +1,11 @@
 bear
 pre:    0
+hp:		100
 atk:    25
 def:    25
 evn:    10
-lck:    50
+lck:    25
+texture:	34
 droptable:  0
 climate:    f
 color:  255,166,0

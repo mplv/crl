@@ -1,4 +1,5 @@
 #include "map.h"
+#include <string.h>
 
 // give the map some color
 void Forest_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
@@ -41,7 +42,7 @@ void Forest_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
 void Forest_GenerateMap(RL_Map* m, RL_Generator* gen)
 {
 	// write out the map to a file for easy viewing of generated map
-	#define DEBUG 1
+	// #define DEBUG 1
 	#ifdef DEBUG
 		FILE *fp = fopen("map.txt","w+");
 	#endif
@@ -124,12 +125,14 @@ void Forest_GenerateMap(RL_Map* m, RL_Generator* gen)
 }
 
 // create a map
-RL_Map * RL_CreateForestMap(int w, int h, RL_Generator *gen)
+RL_Map* RL_CreateForestMap(int w, int h, RL_Generator *gen)
 {
 	RL_Map *m = calloc(1,sizeof(RL_Map));
 	if (!m) {
 		return NULL;
 	}
+	m->creatures = AL_New();
+
     // create the map
     int i = 0;
     // allocate the top level ptr of size w
@@ -140,6 +143,8 @@ RL_Map * RL_CreateForestMap(int w, int h, RL_Generator *gen)
         m->map[i] = calloc(h,sizeof(texture_id_type));
     }
 
+	m->climate = 0;
+
 	m->obstaclesLen = 3;
 	m->obstacles = calloc(3, sizeof(texture_id_type));
 	m->obstacles[0] = CAP_O;
@@ -147,6 +152,10 @@ RL_Map * RL_CreateForestMap(int w, int h, RL_Generator *gen)
 	m->obstacles[2] = CAP_I;
 	m->sizeX = w;
 	m->sizeY = h;
+
+	if (gen) {
+		memcpy(&m->initalGeneratorState, gen, sizeof(RL_Generator));
+	}
 
 	Forest_GenerateMap(m, gen);
 

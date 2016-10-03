@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "arraylist/arraylist.h"
+#include "debug/debug.h"
 
 // create the texture holder
 Textures* Textures_New() {
@@ -33,7 +34,7 @@ int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer
 	// make the correct path
 	int lenOfPath = strnlen(tilesetPath, 500);
 	strncpy(path,tilesetPath,500);
-	strncpy(path+lenOfPath,"img/tileset.png", 26);
+	strncpy(path+lenOfPath,"img/tileset.png", 15);
 	// load the texturemap
 	SDL_Surface *bitmapSurface = IMG_Load(path);
 	if (bitmapSurface == NULL) {
@@ -43,7 +44,7 @@ int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer
 
 	// pick out the textures we want
 	SDL_Rect srcRect= {w:64,h:64};
-	int numTextures = 16 + 16 + 16 + 11 + 15 + 11 + 2; // 26*2+35;
+	int numTextures = (5*16) + 8; // 26*2+35;
 
 	// get all of the textures and make them into sdl textures
 	int i = 0;

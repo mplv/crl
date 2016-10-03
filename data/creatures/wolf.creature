@@ -1,9 +1,11 @@
 wolf
 pre:    0
+hp:		25
 atk:    50
 def:    15
 evn:    20
-lck:    25
+lck:    50
+texture:	82
 droptable:  0
 climate:    f
 color:  128,128,128

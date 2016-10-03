@@ -7,7 +7,7 @@
 // texture position names
 // chars = ` !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz|\u2015`
 typedef enum {
-	SPACE,
+	SPACE = 0,
 	EXCLAIMATION,
 	DOUBLE_QUOTE,
 	POUND,

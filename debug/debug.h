@@ -3,19 +3,13 @@
 
 #include "arraylist/arraylist.h"
 
-typedef struct {
-    ArrayList *l;
-}RL_Debug;
+typedef enum {
+	LOG,
+	WARNING,
+	FATAL,
+	NUM_LEVELS
+}DebugLevel_t;
 
-typedef struct {
-    char debug_message[80];
-}RL_DebugMessage;
-
-
-RL_DebugMessage *RL_GetLastDebugMessage();
-RL_DebugMessage *RL_GetDebugMessage(int pos);
-void RL_AddDebugMessage(char *c);
-void RL_CreateDebug();
-void RL_DestroyDebug();
+void RL_DebugMessage(DebugLevel_t, const char *c);
 
 #endif /* debug_h */

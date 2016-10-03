@@ -23,4 +23,6 @@ typedef struct _RL_RTCONTEXT {
 
 RL_RTContext *RL_CreateRTContext();
 void RL_FreeRTContext(RL_RTContext *rtc);
+void RL_Save(RL_RTContext *rtc);
+void RL_LoadSave(RL_RTContext *rtc);
 #endif

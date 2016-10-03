@@ -1,5 +1,6 @@
 #include "draw.h"
 #include <SDL2/SDL.h>
+#include "entity/creature/creature.h"
 #include "textures/textures.h"
 #include "runtimecontext/runtimecontext.h"
 
@@ -28,13 +29,11 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 		x++;
 	}
 	printf("%d\n", O);
-} */
+}*/
 
 void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	int cx = 0;
 	int cy = 0;
-
-	// TODO camera went one too far in y direction showed black bar at bottom
 
 	// Calculate the top left x position of the camera
 	if (rtc->player->ent->x < (rtc->conf->widthToTiles / 2)) {
@@ -55,11 +54,18 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 		cy = rtc->conf->mapsizey - rtc->conf->heightToTiles;
 	}
 	else {
-		cy = rtc->player->ent->y - (rtc->conf->heightToTiles / 2);
+		cy = rtc->player->ent->y - (rtc->conf->heightToTiles / 2) - 1;
 	}
 
+	// fix the out of bounds that y gives when camera is near top
+	// TODO should fix that
+	if (cx < 0)
+		cx = 0;
+	if (cy < 0)
+		cy = 0;
+
 	// draw the map from that location
-	SDL_Rect dstRect = {x:0,y:0,w:rtc->conf->tileWidth,h:rtc->conf->tileHeight};
+	SDL_Rect dstRect = {x:0, y:0, w:rtc->conf->tileWidth, h:rtc->conf->tileHeight};
 	SDL_Texture *tex = NULL;
 	unsigned char rgbMod[3] = {0};
 	int i = 0;
@@ -85,6 +91,26 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	for (i = 0; i < numCreatures; i++) {
 		// draw creatures and color them
 		// assuming that they are visible in the camera
+		RL_Creature* creature = AL_Get(rtc->creatures, i);
+		if (creature->ent.x >= cx && creature->ent.x < cx+rtc->conf->widthToTiles &&
+			creature->ent.y >= cy && creature->ent.y < cy+rtc->conf->heightToTiles) {
+				// blank out the tile behind the creature
+				dstRect.x = (creature->ent.x - cx) * rtc->conf->tileWidth;
+				dstRect.y = (creature->ent.y - cy) * rtc->conf->tileWidth;
+				SDL_SetRenderDrawColor(renderer,0,0,0,255);
+				SDL_RenderFillRect(renderer, &dstRect);
+				// then draw the character offset by the camera
+				// tex = textures.GetTile('@')
+				dstRect.x = (creature->ent.x - cx) * rtc->conf->tileWidth;
+				dstRect.y = (creature->ent.y - cy) * rtc->conf->tileWidth;
+				tex = Textures_Get(rtc->textures,creature->ent.texture);
+				if (tex == NULL) {
+					printf("Texture %d not availible\n", AT);
+				}
+				SDL_SetTextureColorMod(tex,creature->ent.r,creature->ent.g,creature->ent.b);
+				SDL_RenderCopy(renderer,tex,NULL,&dstRect);
+				SDL_SetTextureColorMod(tex,255,255,255);
+			}
 	}
 
 	// blank out the tile behind the player
@@ -96,7 +122,7 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	// tex = textures.GetTile('@')
 	dstRect.x = (rtc->player->ent->x - cx) * rtc->conf->tileWidth;
 	dstRect.y = (rtc->player->ent->y - cy) * rtc->conf->tileWidth;
-	tex = Textures_Get(rtc->textures,AT);
+	tex = Textures_Get(rtc->textures,rtc->player->ent->texture);
 	if (tex == NULL) {
 		printf("Texture %d not availible\n", AT);
 	}

@@ -7,6 +7,7 @@ typedef struct {
     unsigned char type;
     int amount;
     int number;
+	int base;
 }RL_Item;
 
 RL_Item *RL_NewItem();

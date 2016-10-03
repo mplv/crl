@@ -1,1 +1,14 @@
-Typos are a part of the experience.
+Debug messages can be found if you launch rl from the terminal
+
+Running
+==
+Linux only game as the directory searching code is using dirent to look for
+creature definitions.
+
+To run you must create a folder called img and put an image
+called tileset.png into it.
+
+tileset.png has a very specific format as described below:
+- 16x5 image made of tiles
+- each tile is 64x64
+- the characters are noted in textures/textures.h

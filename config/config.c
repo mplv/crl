@@ -6,9 +6,9 @@
 RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 {
 	// the options that the conf file contains
-    int gen = 0;
-    int tileWidth = 0;
-    int tileHeight = 0;
+	int gen = 0;
+	int tileWidth = 0;
+	int tileHeight = 0;
 	int windowWidth = 0;
 	int windowHeight = 0;
 	char *path;
@@ -16,8 +16,8 @@ RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 	int configFilePathLen = 0;
 	int i = 0;
 
-    // Open and read the file storing it into the config struct
-    RL_Config *c = malloc(sizeof(RL_Config));
+	// Open and read the file storing it into the config struct
+	RL_Config *c = malloc(sizeof(RL_Config));
 
 	// construct path to config file
 	base_path_len = strnlen(base_path,256);
@@ -34,21 +34,21 @@ RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 	c->base_path = base_path;
 
 	// open the file
-    FILE *f = fopen(path,"r");
+	FILE *f = fopen(path,"r");
 	if (f == NULL) {
 		free(c);
 		return NULL;
 	}
 	// read the data from the file
 	fscanf(f, "windowWidth: %d\n", &windowWidth);
-    fscanf(f, "windowHeight: %d\n", &windowHeight);
+	fscanf(f, "windowHeight: %d\n", &windowHeight);
 	fscanf(f, "tileWidth: %d\n", &tileWidth);
-    fscanf(f, "tileHeight: %d\n", &tileHeight);
-    fscanf(f, "gen: %d\n", &gen);
+	fscanf(f, "tileHeight: %d\n", &tileHeight);
+	fscanf(f, "gen: %d\n", &gen);
 	// store data into struct
-    c->gen = gen;
-    c->width = windowWidth;
-    c->height = windowHeight;
+	c->gen = gen;
+	c->width = windowWidth;
+	c->height = windowHeight;
 	c->tileWidth = tileWidth;
 	c->tileHeight = tileHeight;
 	c->widthToTiles = c->width / tileWidth;
@@ -56,12 +56,12 @@ RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 
 	// TODO need to set the below in file or some other thing
 	//
-    // number of tiles in the x and y direction
-    c->mapsizex = 75;
-    c->mapsizey = 50;
+	// number of tiles in the x and y direction
+	c->mapsizex = 75;
+	c->mapsizey = 50;
 	// close the file
-    fclose(f);
-    return c;
+	fclose(f);
+	return c;
 }
 
 void SaveConf(RL_Config *conf)
@@ -76,8 +76,8 @@ void SaveConf(RL_Config *conf)
 	fprintf(f, "windowWidth: %d\n", conf->width);
 	fprintf(f, "windowHeight: %d\n", conf->height);
 	fprintf(f, "tileWidth: %d\n", conf->tileWidth);
-    fprintf(f, "tileHeight: %d\n", conf->tileHeight);
-    fprintf(f, "gen: %d\n", conf->gen);
+	fprintf(f, "tileHeight: %d\n", conf->tileHeight);
+	fprintf(f, "gen: %d\n", conf->gen);
 
 	// close the file
 	fclose(f);
@@ -88,5 +88,5 @@ void RL_FreeConfig(RL_Config *conf)
 	// save all options that might have changed
 	SaveConf(conf);
 	free(conf->path);
-    free(conf);
+	free(conf);
 }

@@ -1,39 +1,22 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "debug.h"
 #include "arraylist/arraylist.h"
 
-void RL_CreateDebug()
+void RL_DebugMessage(DebugLevel_t t, const char *c)
 {
-    // db = calloc(1, sizeof(RL_Debug));
-    // db->l = AL_New();
-}
-
-void RL_AddDebugMessage(char *c)
-{
-    // RL_DebugMessage *dm = calloc(1, sizeof(RL_DebugMessage));
-    // strncpy(dm->debug_message, c, 80);
-    // AL_Add(db->l,dm);
-}
-
-RL_DebugMessage *RL_GetDebugMessage(int pos)
-{
-    // return AL_Get(db->l, pos);
-	return NULL;
-}
-
-RL_DebugMessage *RL_GetLastDebugMessage()
-{
-    // return AL_Get(db->l, AL_Size(db->l) - 1);
-	return NULL;
-}
-
-void RL_DestroyDebug()
-{
-    // while (AL_Size(db->l) > 0) {
-    //     RL_DebugMessage *dm = AL_RemoveLast(db->l);
-    //     free(dm);
-    // }
-    // AL_Destroy(db->l);
-    // free(db);
+	switch (t) {
+		case NUM_LEVELS:
+		case LOG:
+		printf("%c[%dm",0x1B, 0);
+		break;
+		case WARNING:
+		printf("%c[%d;1m",0x1B, 33);
+		break;
+		case FATAL:
+		printf("%c[%d;1m",0x1B, 31);
+		break;
+	}
+	printf("%s%c[%dm\n", c, 0x1B, 0);
 }

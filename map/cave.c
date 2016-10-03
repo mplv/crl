@@ -1,33 +1,19 @@
 #include "map.h"
+#include <string.h>
 
 // color the map
 void Cave_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
 {
 	switch (id) {
-		case CAP_T:
-		rgb[0] = 0;
-		rgb[1] = 218;
-		rgb[2] = 0;
+		case DOT:
+		rgb[0] = 120;
+		rgb[1] = 120;
+		rgb[2] = 120;
 		break;
-		case EXCLAIMATION:
-		rgb[0] = 0;
-		rgb[1] = 255;
-		rgb[2] = 0;
-		break;
-		case CAP_I:
-		rgb[0] = 0;
-		rgb[1] = 161;
-		rgb[2] = 84;
-		break;
-		case CAP_O:
-		rgb[0] = 99;
-		rgb[1] = 99;
-		rgb[2] = 99;
-		break;
-		case O:
-		rgb[0] = 148;
-		rgb[1] = 98;
-		rgb[2] = 0;
+		case POUND:
+		rgb[0] = 230;
+		rgb[1] = 230;
+		rgb[2] = 230;
 		break;
 		default:
 		rgb[0] = 255;
@@ -40,7 +26,7 @@ void Cave_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
 // generate a map based on the generator
 void Cave_GenerateMap(RL_Map* m, RL_Generator* gen)
 {
-	#define DEBUG 1
+	// #define DEBUG 1
 	#ifdef DEBUG
 		FILE *fp = fopen("map.txt","w+");
 	#endif
@@ -53,8 +39,8 @@ void Cave_GenerateMap(RL_Map* m, RL_Generator* gen)
 
 	// small set of tiles get set to open space
 	// these create the bounds
-	int dx = gen->GenerateNumber(gen) % (int)(m->sizeX * 0.05);
-	int dy = gen->GenerateNumber(gen) % (int)(m->sizeY * 0.05);
+	int dx = gen->GenerateNumber(gen) % m->sizeX;
+	int dy = gen->GenerateNumber(gen) % m->sizeY;
 	int sx = size_x_half - (dx / 2.0);
 	int sy = size_y_half - (dy / 2.0);
 
@@ -79,8 +65,10 @@ void Cave_GenerateMap(RL_Map* m, RL_Generator* gen)
 		// get a random floor tile
 		sx = gen->GenerateNumber(gen) % m->sizeX;
 		sy = gen->GenerateNumber(gen) % m->sizeY;
+		i = 0;
 		// while it is a wall
-		while (m->map[sx][sy] != DOT) {
+		while (m->map[sx][sy] != DOT || i < 100) {
+			i++;
 			// get a new tile near this one
 			dx = gen->GenerateNumber(gen) % 2;
 			if (dx == 0)
@@ -212,6 +200,7 @@ RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
 	if (!m) {
 		return NULL;
 	}
+	m->creatures = AL_New();
     // create the map
     int i = 0;
     // allocate the top level ptr of size w
@@ -222,6 +211,8 @@ RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
         m->map[i] = calloc(h,sizeof(texture_id_type));
     }
 
+	m->climate = 1;
+
 	m->obstaclesLen = 3;
 	m->obstacles = calloc(3, sizeof(texture_id_type));
 	m->obstacles[0] = CAP_O;
@@ -229,6 +220,10 @@ RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
 	m->obstacles[2] = CAP_I;
 	m->sizeX = w;
 	m->sizeY = h;
+
+	if (gen) {
+		memcpy(&m->initalGeneratorState, gen, sizeof(RL_Generator));
+	}
 
 	Cave_GenerateMap(m, gen);
 

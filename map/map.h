@@ -22,7 +22,13 @@ typedef struct _RL_MAP {
 	int obstaclesLen;
 	// climate of the map
 	// useful for blending/changing the map climates
-	char climate;
+	int climate;
+
+	ArrayList* creatures;
+
+	// used to allow a snapshot of the generator before
+	// map creation
+	RL_Generator initalGeneratorState;
 
 	void (*DestroyMap)(struct _RL_MAP *, int);
 } RL_Map;
@@ -43,6 +49,10 @@ typedef struct _RL_MAP_GENERATOR_HOLDER {
 // functions global to all generators
 int RL_ValidMove(RL_Map *m, RL_Entity *ent, int dir);
 void RL_DestroyMap(RL_Map *m, int w);
+void RL_MapSave(RL_Map *map, const char *base_path);
+RL_Map* RL_MapLoad(RL_MapGeneratorHolder *mgh, const char *base_path);
+RL_Map* RL_MapLoadGenerate(RL_MapGeneratorHolder* mgh, RL_Generator* gen, int climate, int w, int h);
+void RL_PopulateMap(RL_Map* m, ArrayList *masterList);
 
 // map generator holder functions
 RL_MapGeneratorHolder* RL_CreateMapGeneratorHolder();
