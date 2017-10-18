@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include "generator/generator.h"
 #include "textures/textures.h"
 #include "runtimecontext/runtimecontext.h"
@@ -19,18 +20,23 @@
 // TODO data structure for data of game so that refs are just numbers not pointers
 //		perhaps static arrays for base items and stuff.  Random items generated
 //		and use item id of base items?
+//		Perhaps we just use the arraylist and hope everything ends up in the right
+//		place?
+//		2017-01-10:
+//			Should use arraylist not pointers for data so that way it is eaiser to use
+//			and keep track of memory
 // TODO map generators - need more but some are done like caves
 //		generators:
 //			water pools
 //			standard room based dungeon
 //			wilderness
 //			mountain? - hard to do because of Z level
-//			plains
+//			plains - flat land or rolling
 // TODO time system.  real or soft?
 //			real time - would be more interactive as things move around
 //				and allow for interesting ai
 //			soft time - would allow more time to plan out paths and decide
-//				moves.  Also allows less cpu usage.
+//				moves.  Also allows less cpu usage over time on low end machines
 // TODO monster spawning and stats
 //			have list of all monster defs
 //			need good way to spawn them
@@ -38,18 +44,28 @@
 // TODO player stats and displays
 //			how to do displays for health?
 //				little bar above char or seperate panel?
-//				maybe another window?
+//				maybe another window? - window with stats?
+//				put stats in title bar?
 // TODO monster targeting besides moving into monster
 //			targeting systems like
 //				two key - press to activate target systems then press key to act on target
 //				scroll to target - move cursor to target then select to act?
+//				both because of aoe skills?
+//				use mouse to target? - we have a window might as well use it
 // TODO Saving
 //			writing the important bits to a save file
 //				in this case i am going to use a save folder
 //				it is easier and also allows me to verify that everything is working
+//				rather than use one single file and shove everything together
+//				does allow an eaiser time to cheat and stuff but oh well
 
 int main (int argc, const char *argv[])
 {
+	if (getuid()==0){
+		printf("Running this program as root is unsafe.\nDo not run this program as root!\n");
+		exit(EXIT_FAILURE);
+	}
+
 	int err = 0;
 	int flags = 0;
 	int saveNotLoaded = 1;
@@ -110,7 +126,8 @@ int main (int argc, const char *argv[])
   	}
 
 	// create the structure for the textures
-	Textures *textures = Textures_New();
+	err = SDL_Init(SDL_INIT_VIDEO);
+    Textures *textures = Textures_New();
 	if (textures == NULL) {
 		SDL_free(base_path);
 		printf("Could not create textures\n");
@@ -141,7 +158,7 @@ int main (int argc, const char *argv[])
 	rtc->textures = textures;
 
 	// create a map
-	rtc->mapGenHolder = RL_CreateMapGeneratorHolder();
+	rtc->mapGenHolder = RL_CreateMapGenerator();
 	if (!rtc->mapGenHolder)
 	{
 		SDL_free(base_path);
@@ -153,17 +170,12 @@ int main (int argc, const char *argv[])
 		SDL_DestroyWindow(window);
 		IMG_Quit();
 		SDL_Quit();
-		printf("Map could not be allocated quitting...\n");
+		printf("Map generator could not be allocated quitting...\n");
 		return -1;
 	}
 
-	RL_MapGenerator forest;
-	RL_MapGenerator cave;
-	forest.Create = &RL_CreateForestMap;
-	cave.Create = &RL_CreateCaveMap;
-
-	rtc->mapGenHolder->Register(rtc->mapGenHolder,&forest);
-	rtc->mapGenHolder->Register(rtc->mapGenHolder,&cave);
+	RL_MapGeneratorAdd(rtc->mapGenHolder,&RL_CreateForestMap);
+	RL_MapGeneratorAdd(rtc->mapGenHolder,&RL_CreateCaveMap);
 
 	// if this is the first time the game is being run
 	// set the generator seed
@@ -182,18 +194,20 @@ int main (int argc, const char *argv[])
 
 	// load the creatures but dont do anything with them just yet
 	// TODO this requires dirent not sure if it can be used on windows
+	// might just be better to open a file with a list of creatures and
+	// loop through that to get the data files
 	rtc->creatures = RL_LoadAllCreatures(rtc->conf);
 
 	if (saveNotLoaded) {
 		// generate a map
-		rtc->map = rtc->mapGenHolder->Generate(rtc->mapGenHolder, rtc->conf->mapsizex, rtc->conf->mapsizey, rtc->gen);\
+		rtc->map = RL_GenerateMap(rtc->mapGenHolder, rtc->conf->mapsizex, rtc->conf->mapsizey, rtc->gen);
 		// create a player
 		rtc->player = RL_NewPlayer();
 		// set player color
 		// TODO get values from config?
-		rtc->player->ent->r = 0;
-		rtc->player->ent->g = 255;
-		rtc->player->ent->b = 255;
+		rtc->player->ent->r = 255;
+		rtc->player->ent->g = 10;
+		rtc->player->ent->b = 50;
 		RL_PopulateMap(rtc->map, rtc->creatures);
 	}
 
@@ -227,13 +241,14 @@ int main (int argc, const char *argv[])
 				// global key presses are in here
 				// otherwise the game input state gets called
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_q && event.key.keysym.mod == KMOD_LCTRL)
+					if (event.key.keysym.sym == SDLK_q && ((event.key.keysym.mod & KMOD_CTRL) > 0))
 					{
 						running = 0;
 						break;
 					}
 					// do stuff
 					gameInputStateHolder->Do(gameInputStateHolder,rtc,event.key.keysym.sym);
+					// move the creatures around?
 					break;
 				case SDL_QUIT:
 					running = 0;
@@ -253,22 +268,17 @@ int main (int argc, const char *argv[])
 	SDL_free(base_path);
 	GIS_FreeHolder(gameInputStateHolder);
 	Textures_Destroy(textures);
-	RL_Creature* creature = AL_RemoveLast(rtc->creatures);
-	while (creature != NULL) {
-		free(creature->name);
-		free(creature);
-		creature = AL_RemoveLast(rtc->creatures);
-	}
 	RL_FreeCreaturesList(rtc->creatures);
 	RL_DestroyPlayer(rtc->player);
-	rtc->map->DestroyMap(rtc->map, rtc->conf->mapsizex);
-	RL_DestroyMapGeneratorHolder(rtc->mapGenHolder);
+	RL_DestroyMap(rtc->map, rtc->conf->mapsizex);
+	RL_DestroyMapGenerator(rtc->mapGenHolder);
 	RL_FreeGenerator(rtc->gen);
 	RL_FreeConfig(rtc->conf);
 	RL_FreeRTContext(rtc);
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+	IMG_Quit();
 	SDL_Quit();
 	return 0;
 }
