@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include "debug/debug.h"
 
-#ifdef __L64__
+/*
 // CMWC PRNG from
 // http://school.anhb.uwa.edu.au/personalpages/kwessen/shared/Marsaglia03.html
-unsigned long CMWC4096(RL_Generator* gen) {
+unsigned long CMWC4096(Random* gen) {
 	// do random number generator stuff
 	unsigned long long t, a=18782LL;
 	unsigned long i=4095;
@@ -19,42 +19,48 @@ unsigned long CMWC4096(RL_Generator* gen) {
 	if(x<gen->c){x++;gen->c++;}
 	return(gen->Q[i]=r-x);
 }
-#else
+*/
+
 // CMWC PRNG from
 // http://school.anhb.uwa.edu.au/personalpages/kwessen/shared/Marsaglia03.html
-unsigned int CMWC4096(RL_Generator* gen) {
-	// do random number generator stuff
-	unsigned int t, a=18782LL;
-	unsigned int i=4095;
-	unsigned int x,r=0xfffffffe;
-	i=(i+1)&4095;
-	t=a*gen->Q[i]+gen->c;
-	gen->c=(t>>16);
-	x=t+gen->c;
-	if(x<gen->c){x++;gen->c++;}
-	return(gen->Q[i]=r-x);
+unsigned long xorshift(Random *gen) {
+	gen->state[0] = ((gen->state[1])^((gen->state[1])>>7));
+	gen->state[1] = gen->state[2];
+	gen->state[2] = gen->state[3];
+	gen->state[3] = gen->state[4];
+	gen->state[4] = gen->state[5];
+	gen->state[5] = ((gen->state[5])^((gen->state[5])>>6))^((gen->state[0])^((gen->state[0])<<13));
+	return ((gen->state[2]) + (gen->state[2]) + 1)*(gen->state[5]);
 }
-#endif
 
-RL_Generator* RL_GeneratorNew(int gen){
+Random* NewRandom(int gen){
 	int i = 0;
-	RL_Generator* g = calloc(1, sizeof(RL_Generator));
-	g->c = 362436;
+	Random* g = calloc(1, sizeof(Random));
 	srand(gen);
-	for (i = 0; i < 4096; i++) {
-		g->Q[i] = rand();
+	for (; i < 6; i++) {
+		g->state[i] = rand();
 	}
-	g->GenerateNumber = &CMWC4096;
+	g->GenerateNumber = &xorshift;
 	return g;
 }
 
-void RL_FreeGenerator(RL_Generator* gen){
+Random* NewRandomWithState(unsigned long arr[6]) {
+	int i = 0;
+	Random* g = calloc(1, sizeof(Random));
+	for ( ; i < 6; i++) {
+		g->state[i] = arr[i];
+	}
+	g->GenerateNumber = &xorshift;
+	return g;
+}
+
+void DestroyRandom(Random* gen){
 	free(gen);
 }
 
-RL_Generator* RL_NumGenLoad(const char *base_path)
+Random* RandomLoad(const char *base_path)
 {
-	RL_Generator *gen = calloc(1,sizeof(RL_Generator));
+	Random *gen = calloc(1,sizeof(Random));
 	const char *load_loc = "data/save/gen.txt";
 	int basePathLen = 0;
 	int loadLocLen = 0;
@@ -69,29 +75,22 @@ RL_Generator* RL_NumGenLoad(const char *base_path)
 		load_path[i + basePathLen] = load_loc[i];
 	}
 	load_path[basePathLen+loadLocLen] = '\0';
-	RL_DebugMessage(LOG, load_path);
+	DebugMessageStart(LOG);
+	printf("%s", load_path);
+    DebugMessageEnd();
 	FILE *f = fopen(load_path, "r");
 	if (f) {
-		for (i = 0; i < 4096; i++) {
-			#ifdef __L64__
-			fscanf(f, "%lu\n", &(gen->Q[i]));
-			#else
-			fscanf(f, "%u\n", &(gen->Q[i]));
-			#endif
+		for (i = 0; i < 6; i++) {
+			fscanf(f, "%lu\n", &(gen->state[i]));
 		}
-		#ifdef __L64__
-		fscanf(f, "%lu\n", &(gen->c));
-		#else
-		fscanf(f, "%u\n", &(gen->c));
-		#endif
 		fclose(f);
 	}
 	free(load_path);
-	gen->GenerateNumber = &CMWC4096;
+	gen->GenerateNumber = &xorshift;
 	return gen;
 }
 
-void RL_NumGenSave(RL_Generator* gen, const char *base_path) {
+void RandomSave(Random* gen, const char *base_path) {
 	const char *save_loc = "data/save/gen.txt";
 	int basePathLen = 0;
 	int saveLocLen = 0;
@@ -106,21 +105,14 @@ void RL_NumGenSave(RL_Generator* gen, const char *base_path) {
 		save_path[i + basePathLen] = save_loc[i];
 	}
 	save_path[basePathLen+saveLocLen] = '\0';
-	RL_DebugMessage(LOG, save_path);
+	DebugMessageStart(LOG);
+	printf("%s", save_path);
+    DebugMessageEnd();
 	FILE *f = fopen(save_path, "w");
 	if (f) {
-		for (i = 0; i < 4096; i++) {
-			#ifdef __L64__
-			fprintf(f, "%lu\n", gen->Q[i]);
-			#else
-			fprintf(f, "%u\n", gen->Q[i]);
-			#endif
+		for (i = 0; i < 6; i++) {
+			fprintf(f, "%lu\n", gen->state[i]);
 		}
-		#ifdef __L64__
-		fprintf(f, "%lu\n", gen->c);
-		#else
-		fprintf(f, "%u\n", gen->c);
-		#endif
 		fclose(f);
 	}
 	free(save_path);

@@ -6,13 +6,13 @@
 #include "entity/entity.h"
 
 typedef struct {
-    RL_Entity *ent;
+    Entity *ent;
     ArrayList *inventory;
-} RL_Player;
+} Player;
 
-RL_Player* RL_NewPlayer();
-void RL_DestroyPlayer(RL_Player *rtc);
-void RL_PlayerSave(RL_Player *player, const char *);
-RL_Player* RL_PlayerLoad(const char *);
+Player* NewPlayer();
+void DestroyPlayer(Player *player);
+void PlayerSave(Player *player, const char *);
+Player* PlayerLoad(const char *);
 
 #endif /* player_h */

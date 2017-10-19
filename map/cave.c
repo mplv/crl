@@ -2,7 +2,7 @@
 #include <string.h>
 
 // color the map
-void Cave_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
+void Cave_GetColors(Map *m, unsigned char rgb[3], texture_id_type id)
 {
 	switch (id) {
 		case DOT:
@@ -24,7 +24,7 @@ void Cave_GetColors(RL_Map *m, unsigned char rgb[3], texture_id_type id)
 }
 
 // generate a map based on the generator
-void Cave_GenerateMap(RL_Map* m, RL_Generator* gen)
+void Cave_GenerateMap(Map* m, Random* gen)
 {
 	// #define DEBUG 1
 	#ifdef DEBUG
@@ -194,13 +194,13 @@ void Cave_GenerateMap(RL_Map* m, RL_Generator* gen)
 }
 
 // create the map
-RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
+Map* CreateCaveMap(int w, int h, Random *gen)
 {
-	RL_Map *m = calloc(1,sizeof(RL_Map));
+	Map *m = calloc(1,sizeof(Map));
 	if (!m) {
 		return NULL;
 	}
-	m->creatures = AL_New();
+	m->creatures = NewList();
     // create the map
     int i = 0;
     // allocate the top level ptr of size w
@@ -211,7 +211,7 @@ RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
         m->map[i] = calloc(h,sizeof(texture_id_type));
     }
 
-	m->climate = 1;
+	m->climate = CAVE;
 
 	m->obstaclesLen = 3;
 	m->obstacles = calloc(3, sizeof(texture_id_type));
@@ -222,13 +222,9 @@ RL_Map* RL_CreateCaveMap(int w, int h, RL_Generator *gen)
 	m->sizeY = h;
 
 	if (gen) {
-		memcpy(&m->initalGeneratorState, gen, sizeof(RL_Generator));
+		memcpy(&m->initalGeneratorState, gen, sizeof(Random));
 	}
 
 	Cave_GenerateMap(m, gen);
-
-	m->ValidMove = &RL_ValidMove;
-	m->GetColor = &Cave_GetColors;
-	m->DestroyMap = &RL_DestroyMap;
 	return m;
 }

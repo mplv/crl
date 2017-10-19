@@ -1,10 +1,10 @@
-#ifndef RL_MAP_GENERATORS
-#define RL_MAP_GENERATORS
+#ifndef MAP_GENERATORS
+#define MAP_GENERATORS
 
 #include "map.h"
 
 // all specific generators functions go below
-RL_Map * RL_CreateForestMap(int w, int h, RL_Generator *gen);
-RL_Map * RL_CreateCaveMap(int w, int h, RL_Generator *gen);
+Map * CreateForestMap(int w, int h, Random *gen);
+Map * CreateCaveMap(int w, int h, Random *gen);
 
 #endif

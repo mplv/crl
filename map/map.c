@@ -10,40 +10,42 @@
 #include "textures/textures.h"
 #include "runtimecontext/runtimecontext.h"
 
-// register a generator with the holder
-void RL_MapGeneratorHolderRegister(RL_MapGeneratorHolder* mgh, RL_MapGenerator* mg) {
-	AL_Add(mgh->list, mg);
+// add a map creation function to the list of available functions
+// in order as defined in map.h
+void MapGeneratorAdd(MapGenerator* mg, Map* (*MAPCreate)(int, int, Random *)) {
+	ListAdd(mg->list, MAPCreate);
 }
 
 // use the holder to generate a map
 // TODO make it blend maps so that it makes some sense
-RL_Map *RL_GenerateMap(RL_MapGeneratorHolder* mgh, int w, int h, RL_Generator* gen)
+Map *GenerateMap(MapGenerator* mg, int w, int h, Random* gen)
 {
-	RL_MapGenerator* mg = AL_Get(mgh->list,1);
-	return mg->Create(w,h,gen);
+	Map* (*func)(int, int, Random *) = ListGet(mg->list,0);
+	if (func != NULL) {
+		return func(w,h,gen);
+	}
+	return NULL;
 }
 
 // create the map generator holder container
-RL_MapGeneratorHolder* RL_CreateMapGeneratorHolder()
+MapGenerator* CreateMapGenerator()
 {
-	RL_MapGeneratorHolder *mgh = calloc(1,sizeof(RL_MapGeneratorHolder));
-	mgh->list = AL_New();
-	mgh->Register = &RL_MapGeneratorHolderRegister;
-	mgh->Generate = &RL_GenerateMap;
-	return mgh;
+	MapGenerator *mg = calloc(1,sizeof(MapGenerator));
+	mg->list = NewList();
+	return mg;
 }
 
-void RL_DestroyMapGeneratorHolder(RL_MapGeneratorHolder *mgh)
+void DestroyMapGenerator(MapGenerator *mg)
 {
 	// force programmer to remove all of the elements in list
 	// to prevent them from forgetting that they need to deal with the pointers
 	// stored in there
-	while(AL_Size(mgh->list) > 0){AL_RemoveLast(mgh->list);}
-	AL_Destroy(mgh->list);
-	free(mgh);
+	while(ListSize(mg->list) > 0){ListRemoveLast(mg->list);}
+	ListDestroy(mg->list);
+	free(mg);
 }
 
-void RL_MapSave(RL_Map *map, const char *base_path) {
+void MapSave(Map *map, const char *base_path) {
 	const char *save_loc = "data/save/map.txt";
 	int basePathLen = 0;
 	int saveLocLen = 0;
@@ -58,39 +60,35 @@ void RL_MapSave(RL_Map *map, const char *base_path) {
 		save_path[i + basePathLen] = save_loc[i];
 	}
 	save_path[basePathLen+saveLocLen] = '\0';
-	RL_DebugMessage(LOG, save_path);
+	DebugMessageStart(LOG);
+	printf("%s", save_path);
+    DebugMessageEnd();
 	FILE *f = fopen(save_path, "w");
 	if (f) {
-		for (i = 0; i < 4096; i++) {
-			#ifdef __L64__
-			fprintf(f, "%lu\n", map->initalGeneratorState.Q[i]);
-			#else
-			fprintf(f, "%u\n", map->initalGeneratorState.Q[i]);
-			#endif
+		for (i = 0; i < 6; i++) {
+			fprintf(f, "%lu\n", map->initalGeneratorState.state[i]);
 		}
-		#ifdef __L64__
-        fprintf(f, "%lu\n", map->initalGeneratorState.c);
-        #else
-        fprintf(f, "%u\n", map->initalGeneratorState.c);
-        #endif
 		fprintf(f, "%d\n", map->climate);
 		fprintf(f, "%d\n", map->sizeX);
 		fprintf(f, "%d\n", map->sizeY);
 		fclose(f);
-		RL_CreatureListSave(map->creatures,base_path);
+		CreatureListSave(map->creatures,base_path);
 	}
 	free(save_path);
 }
 
-RL_Map* RL_MapLoadGenerate(RL_MapGeneratorHolder* mgh, RL_Generator* gen, int climate, int w, int h)
+Map* MapLoadGenerate(MapGenerator* mg, Random* gen, climates_t climate, int w, int h)
 {
-	RL_MapGenerator* mg = AL_Get(mgh->list,climate);
-	return mg->Create(w,h,gen);
+	Map* (*func)(int, int, Random *) = ListGet(mg->list,climate);
+	if (func != NULL) {
+		return func(w,h,gen);
+	}
+	return NULL;
 }
 
-RL_Map* RL_MapLoad(RL_MapGeneratorHolder *mgh, const char *base_path) {
-	RL_Map *map = NULL;
-	RL_Generator gen;
+Map* MapLoad(MapGenerator *mg, const char *base_path) {
+	Map *map = NULL;
+	unsigned long arr[6];
 	int climate;
 	int sizeX;
 	int sizeY;
@@ -108,54 +106,50 @@ RL_Map* RL_MapLoad(RL_MapGeneratorHolder *mgh, const char *base_path) {
 		load_path[i + basePathLen] = load_loc[i];
 	}
 	load_path[basePathLen+loadLocLen] = '\0';
-	RL_DebugMessage(LOG, load_path);
+	DebugMessageStart(LOG);
+	printf("%s", load_path);
+    DebugMessageEnd();
 	FILE *f = fopen(load_path, "r");
 	if (f) {
-		for (i = 0; i < 4096; i++) {
-			#ifdef __L64__
-			fscanf(f, "%lu\n", &(gen.Q[i]));
-			#else
-			fscanf(f, "%u\n", &(gen.Q[i]));
-			#endif
+		for (i = 0; i < 6; i++) {
+			fscanf(f, "%lu\n", &(arr[i]));
 		}
-		#ifdef __L64__
-		fscanf(f, "%lu\n", &(gen.c));
-		#else
-		fscanf(f, "%u\n", &(gen.c));
-		#endif
 		fscanf(f, "%d\n", &climate);
 		fscanf(f, "%d\n", &sizeX);
 		fscanf(f, "%d\n", &sizeY);
 		fclose(f);
-		gen.GenerateNumber = &CMWC4096;
-		map = RL_MapLoadGenerate(mgh, &gen,climate, sizeX,sizeY);
+		// TODO do not forget to free this!!!!
+		Random* gen = NewRandomWithState(arr);
+		map = MapLoadGenerate(mg, gen, climate, sizeX, sizeY);
+		DestroyRandom(gen);
 	}
 
 	free(load_path);
 	return map;
 }
 
-void RL_PopulateMap(RL_Map* m, ArrayList* masterList)
+void PopulateMap(Map* m, ArrayList* masterList)
 {
 	int numberOfCreatures = 10;
 	while(numberOfCreatures > 0)
 	{
-		// TODO make better way to add creatures to a mpa
+		// TODO make better way to add creatures to a map
 		// use the climate to determine what gets added
 		// and then find some way to add a good distribution of them
 		// also need to copy the creatuers over from the master list
 		// as otherwise you modify the the creature for the entire game
-		RL_Creature* creature = calloc(1, sizeof(RL_Creature));
-		memcpy(creature, AL_Get(masterList,0), sizeof(RL_Creature));
+		Creature* creature = calloc(1, sizeof(Creature));
+		memcpy(creature, ListGet(masterList,0), sizeof(Creature));
+		creature->nameAllocd = 0;
 		creature->ent.x = numberOfCreatures;
 		creature->ent.y = numberOfCreatures;
-		AL_Add(m->creatures, creature);
+		ListAdd(m->creatures, creature);
 		numberOfCreatures--;
 	}
 }
 
 // free the map pointer that we allocated
-void RL_DestroyMap(RL_Map *m, int w)
+void DestroyMap(Map *m, int w)
 {
     int i = 0;
     for (; i < w; i++) {
@@ -163,20 +157,28 @@ void RL_DestroyMap(RL_Map *m, int w)
     }
     free(m->map);
 	free(m->obstacles);
-	RL_Creature* c = AL_RemoveLast(m->creatures);
+	printf("creature list size: %d\n", ListSize(m->creatures));
+	Creature* c = ListRemoveLast(m->creatures);
 	while (c != NULL)
 	{
+		if (c->nameAllocd == 1)
+		{
+			free(c->name);
+		}
 		free(c);
-		c = AL_RemoveLast(m->creatures);
+		c = ListRemoveLast(m->creatures);
 	}
+	DebugMessageStart(LOG);
+	printf("creature list size: %d\nCalling ListDestroy on creaturelist", ListSize(m->creatures));
+	DebugMessageEnd();
 	// free the list
 	// note only works if the list size is 0
-	AL_Destroy(m->creatures);
+	ListDestroy(m->creatures);
 	free(m);
 }
 
 // Check for a valid move based on a map, entity and a directon of movement
-int RL_ValidMove(RL_Map *m, RL_Entity *ent, int dir)
+int ValidMove(Map *m, Entity *ent, int dir)
 {
     int b = 1;
     int i = 0;
@@ -217,4 +219,70 @@ int RL_ValidMove(RL_Map *m, RL_Entity *ent, int dir)
             b = 0;
     }
     return b;
+}
+
+// color the map
+void MapGetColor(Map *m, unsigned char rgb[3], texture_id_type id)
+{
+	switch (m->climate) {
+
+		case CAVE:
+		switch (id) {
+			case DOT:
+			rgb[0] = 120;
+			rgb[1] = 120;
+			rgb[2] = 120;
+			break;
+			case POUND:
+			rgb[0] = 230;
+			rgb[1] = 230;
+			rgb[2] = 230;
+			break;
+			default:
+			rgb[0] = 255;
+			rgb[1] = 255;
+			rgb[2] = 255;
+			break;
+		}
+		break;
+		case FOREST:
+		switch (id) {
+			case CAP_T:
+			rgb[0] = 0;
+			rgb[1] = 218;
+			rgb[2] = 0;
+			break;
+			case EXCLAIMATION:
+			rgb[0] = 0;
+			rgb[1] = 255;
+			rgb[2] = 0;
+			break;
+			case CAP_I:
+			rgb[0] = 0;
+			rgb[1] = 161;
+			rgb[2] = 84;
+			break;
+			case CAP_O:
+			rgb[0] = 99;
+			rgb[1] = 99;
+			rgb[2] = 99;
+			break;
+			case O:
+			rgb[0] = 148;
+			rgb[1] = 98;
+			rgb[2] = 0;
+			break;
+			default:
+			rgb[0] = 255;
+			rgb[1] = 255;
+			rgb[2] = 255;
+			break;
+		}
+		break;
+		default:
+		rgb[0] = 255;
+		rgb[1] = 255;
+		rgb[2] = 255;
+		break;
+	}
 }

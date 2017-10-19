@@ -12,7 +12,7 @@ typedef enum {
 
 // GameInputState for controlling input on various screens
 typedef struct _GAME_INPUT_STATE {
-	InputState_t (*Do)(RL_RTContext*, SDL_Keycode);
+	InputState_t (*Do)(Context*, SDL_Keycode);
 	void (*Destroy)(struct _GAME_INPUT_STATE*);
 } GameInputState;
 
@@ -20,7 +20,7 @@ typedef struct _GAME_INPUT_STATE_HOLDER {
 	InputState_t s;
 	void (*SetActive)(struct _GAME_INPUT_STATE_HOLDER *,InputState_t);
 	void (*Register)(struct _GAME_INPUT_STATE_HOLDER *,GameInputState*);
-	void (*Do) (struct _GAME_INPUT_STATE_HOLDER*, RL_RTContext*, SDL_Keycode);
+	void (*Do) (struct _GAME_INPUT_STATE_HOLDER*, Context*, SDL_Keycode);
 	ArrayList *list;
 } GameInputStateHolder;
 
@@ -29,7 +29,7 @@ GameInputStateHolder* GIS_NewHolder();
 void GIS_FreeHolder(GameInputStateHolder *gish);
 
 // each new state constructor below
-GameInputState *GIS_Main_State_New();
+GameInputState *GIS_MainStateNew();
 
 
 #endif

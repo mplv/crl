@@ -6,29 +6,29 @@
 #include "arraylist/arraylist.h"
 #include "debug/debug.h"
 
-RL_Player* RL_NewPlayer()
+Player* NewPlayer()
 {
-    RL_Player *player = calloc(1, sizeof(RL_Player));
-    player->ent = RL_NewEntity();
+    Player *player = calloc(1, sizeof(Player));
+    player->ent = NewEntity();
 	player->ent->x = 0;
 	player->ent->y = 0;
-    player->inventory = AL_New();
+    player->inventory = NewList();
 	player->ent->texture = AT;
     return player;
 }
 
-void RL_DestroyPlayer(RL_Player *player)
+void DestroyPlayer(Player *player)
 {
-    while (AL_Size(player->inventory) > 0) {
-        RL_Item *i = AL_RemoveLast(player->inventory);
+    while (ListSize(player->inventory) > 0) {
+        Item *i = ListRemoveLast(player->inventory);
         free(i);
     }
-    AL_Destroy(player->inventory);
+    ListDestroy(player->inventory);
     free(player->ent);
     free(player);
 }
 
-void RL_PlayerSave(RL_Player *player, const char *base_path){
+void PlayerSave(Player *player, const char *base_path){
 	const char *save_loc = "data/save/player.txt";
 	int basePathLen = 0;
 	int saveLocLen = 0;
@@ -43,20 +43,22 @@ void RL_PlayerSave(RL_Player *player, const char *base_path){
 		save_path[i + basePathLen] = save_loc[i];
 	}
 	save_path[basePathLen+saveLocLen] = '\0';
-	RL_DebugMessage(LOG, save_path);
+    DebugMessageStart(LOG);
+	printf("%s", save_path);
+    DebugMessageEnd();
 	FILE *f = fopen(save_path, "w");
 	if (f) {
-		RL_EntitySave(f, player->ent);
-		// RL_InventorySave(f, player->inventory);
+		EntitySave(f, player->ent);
+		// InventorySave(f, player->inventory);
 		fclose(f);
 	}
 	free(save_path);
 }
 
-RL_Player* RL_PlayerLoad(const char *base_path){
-	RL_Player *player = calloc(1,sizeof(RL_Player));
-	player->ent = calloc(1,sizeof(RL_Entity));
-	player->inventory = AL_New();
+Player* PlayerLoad(const char *base_path){
+	Player *player = calloc(1,sizeof(Player));
+	player->ent = calloc(1,sizeof(Entity));
+	player->inventory = NewList();
 	const char *load_loc = "data/save/player.txt";
 	int basePathLen = 0;
 	int loadLocLen = 0;
@@ -71,11 +73,13 @@ RL_Player* RL_PlayerLoad(const char *base_path){
 		load_path[i + basePathLen] = load_loc[i];
 	}
 	load_path[basePathLen+loadLocLen] = '\0';
-	RL_DebugMessage(LOG, load_path);
+    DebugMessageStart(LOG);
+	printf("%s", load_path);
+    DebugMessageEnd();
 	FILE *f = fopen(load_path, "r");
 	if (f) {
-		RL_EntityLoad(f, player->ent);
-		// RL_InventoryLoad(f, player->inventory);
+		EntityLoad(f, player->ent);
+		// InventoryLoad(f, player->inventory);
 		fclose(f);
 	}
 	free(load_path);

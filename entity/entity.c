@@ -3,9 +3,9 @@
 #include "entity.h"
 #include "debug/debug.h"
 
-RL_Entity* RL_NewEntity()
+Entity* NewEntity()
 {
-    RL_Entity *ent = calloc(1, sizeof(RL_Entity));
+    Entity *ent = calloc(1, sizeof(Entity));
     ent->hp = 50;
     ent->maxHp = 90;
     ent->mp = 83;
@@ -13,12 +13,12 @@ RL_Entity* RL_NewEntity()
     return ent;
 }
 
-void RL_DestroyEntity(RL_Entity *ent)
+void DestroyEntity(Entity *ent)
 {
     free(ent);
 }
 
-void RL_EntitySave(FILE* f, RL_Entity* e)
+void EntitySave(FILE* f, Entity* e)
 {
 	// write the entity to the given file
 	fprintf(f, "%d\n", e->x);
@@ -38,7 +38,7 @@ void RL_EntitySave(FILE* f, RL_Entity* e)
 	fprintf(f, "%d\n", e->b);
 }
 
-void RL_EntityLoad(FILE* f, RL_Entity* e)
+void EntityLoad(FILE* f, Entity* e)
 {
 	int tex = 0;
 	// read the entity to the given file
@@ -60,7 +60,7 @@ void RL_EntityLoad(FILE* f, RL_Entity* e)
 	e->texture = tex;
 }
 
-void RL_EntityMove(RL_Entity *ent, int dir, int maxX, int maxY)
+void EntityMove(Entity *ent, int dir, int maxX, int maxY)
 {
     switch (dir) {
         case 0: // w

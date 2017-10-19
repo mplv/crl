@@ -6,57 +6,60 @@
 #include "generator/generator.h"
 #include "arraylist/arraylist.h"
 
-typedef struct _RL_MAP {
+typedef enum {
+	FOREST,
+	CAVE,
+	NUM_CLIMATES
+} climates_t;
+
+typedef struct _MAP {
 	// all of the textures in a map should use new data structure
 	texture_id_type **map;
-	// valid move for an entity at an (x,y) in a direction
-	int (*ValidMove) (struct _RL_MAP *,RL_Entity*,int dir);
-	// gets the color of the tile
-	void (*GetColor) (struct _RL_MAP*, unsigned char arr[3], texture_id_type);
+
 	// size of map in tiles
 	int sizeX;
 	int sizeY;
+
 	// the tiles that entities cannot move through
 	texture_id_type *obstacles;
+
 	// len of the obstacles array
 	int obstaclesLen;
+
 	// climate of the map
 	// useful for blending/changing the map climates
-	int climate;
+	// or determining creature spawn or map type
+	climates_t climate;
 
+	// each creature in this is so that we do not change the templates
+	// in rtc->creaturess
 	ArrayList* creatures;
 
 	// used to allow a snapshot of the generator before
-	// map creation
-	RL_Generator initalGeneratorState;
-
-	void (*DestroyMap)(struct _RL_MAP *, int);
-} RL_Map;
-
-// Def for a map generator.
-// each generator has to have a create function
-typedef struct _RL_MAP_GENERATOR {
-	RL_Map* (*Create)(int,int,RL_Generator*);
-} RL_MapGenerator;
+	// map creation so that when we ask for generation
+	// it gives us the same map we had when we stopped playing
+	Random initalGeneratorState;
+} Map;
 
 // generator holder for all generators
-typedef struct _RL_MAP_GENERATOR_HOLDER {
+typedef struct _MAP_GENERATOR {
 	ArrayList* list;
-	void (*Register)(struct _RL_MAP_GENERATOR_HOLDER*,RL_MapGenerator*);
-	RL_Map* (*Generate) (struct _RL_MAP_GENERATOR_HOLDER* mgh, int w, int h, RL_Generator* gen);
-} RL_MapGeneratorHolder;
+} MapGenerator;
 
 // functions global to all generators
-int RL_ValidMove(RL_Map *m, RL_Entity *ent, int dir);
-void RL_DestroyMap(RL_Map *m, int w);
-void RL_MapSave(RL_Map *map, const char *base_path);
-RL_Map* RL_MapLoad(RL_MapGeneratorHolder *mgh, const char *base_path);
-RL_Map* RL_MapLoadGenerate(RL_MapGeneratorHolder* mgh, RL_Generator* gen, int climate, int w, int h);
-void RL_PopulateMap(RL_Map* m, ArrayList *masterList);
+int ValidMove(Map *m, Entity *ent, int dir);
+void DestroyMap(Map *m, int w);
+void MapSave(Map *map, const char *base_path);
+Map* MapLoad(MapGenerator *mg, const char *base_path);
+Map* MapLoadGenerate(MapGenerator* mg, Random* gen, climates_t climate, int w, int h);
+void PopulateMap(Map* m, ArrayList *masterList);
+void MapGetColor(Map *m, unsigned char rgb[3], texture_id_type id);
 
 // map generator holder functions
-RL_MapGeneratorHolder* RL_CreateMapGeneratorHolder();
-void RL_DestroyMapGeneratorHolder(RL_MapGeneratorHolder *mgh);
+MapGenerator* CreateMapGenerator();
+void DestroyMapGenerator(MapGenerator *mg);
+void MapGeneratorAdd(MapGenerator* mg, Map* (*MAPCreate)(int, int, Random *));
+Map *GenerateMap(MapGenerator* mg, int w, int h, Random* gen);
 
 
 #endif /* map_h */

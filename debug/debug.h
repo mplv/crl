@@ -10,6 +10,9 @@ typedef enum {
 	NUM_LEVELS
 }DebugLevel_t;
 
-void RL_DebugMessage(DebugLevel_t, const char *c);
+void DebugMessage(DebugLevel_t, const char *c);
+
+void DebugMessageStart(DebugLevel_t);
+void DebugMessageEnd();
 
 #endif /* debug_h */

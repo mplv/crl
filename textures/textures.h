@@ -106,9 +106,9 @@ typedef struct _TEXTURES {
 } Textures;
 
 // texture functions
-Textures* Textures_New();
-int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer);
-void Textures_Destroy(Textures *tex);
-SDL_Texture* Textures_Get(Textures *tex, texture_id_type id);
+Textures* NewTextures();
+int LoadTextures(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer);
+void DestroyTextures(Textures *tex);
+SDL_Texture* TexturesGet(Textures *tex, texture_id_type id);
 
 #endif

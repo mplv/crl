@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include "config.h"
 
-RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
+Config* LoadConfig(const char *base_path, const char *configFilePath)
 {
 	// the options that the conf file contains
 	int gen = 0;
@@ -17,7 +17,7 @@ RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 	int i = 0;
 
 	// Open and read the file storing it into the config struct
-	RL_Config *c = malloc(sizeof(RL_Config));
+	Config *c = malloc(sizeof(Config));
 
 	// construct path to config file
 	base_path_len = strnlen(base_path,256);
@@ -64,7 +64,7 @@ RL_Config* RL_LoadConfig(const char *base_path, const char *configFilePath)
 	return c;
 }
 
-void SaveConf(RL_Config *conf)
+void SaveConf(Config *conf)
 {
 	// open the conf file
 	FILE *f = fopen(conf->path,"w");
@@ -83,7 +83,7 @@ void SaveConf(RL_Config *conf)
 	fclose(f);
 }
 
-void RL_FreeConfig(RL_Config *conf)
+void FreeConfig(Config *conf)
 {
 	// save all options that might have changed
 	SaveConf(conf);

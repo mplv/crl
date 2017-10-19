@@ -9,25 +9,25 @@
 #include "debug/debug.h"
 
 // create the texture holder
-Textures* Textures_New() {
+Textures* NewTextures() {
 	Textures* t = calloc(1, sizeof(Textures));
 	if (t == NULL)
 	{
 		return NULL;
 	}
-	t->textures = AL_New();
+	t->textures = NewList();
 	if (t->textures == NULL) {
 		free(t);
 		return NULL;
 	}
-	t->Load = &Textures_Load;
-	t->Destroy = &Textures_Destroy;
-	t->Get = &Textures_Get;
+	t->Load = &LoadTextures;
+	t->Destroy = &DestroyTextures;
+	t->Get = &TexturesGet;
 	return t;
 }
 
-// Textures_Load returns the number of textures created
-int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer) {
+// LoadTextures returns the number of textures created
+int LoadTextures(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer) {
 
 	// open texture file should open from tilesetPath but not yet
 	char path[500] = {0};
@@ -109,7 +109,7 @@ int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer
 		}
 
 		// add the new texture to the texture list
-		AL_Add(tex->textures, tmp_tex);
+		ListAdd(tex->textures, tmp_tex);
 		// clean up the surface
 		SDL_FreeSurface(surface);
 	}
@@ -117,26 +117,26 @@ int Textures_Load(Textures *tex, const char* tilesetPath, SDL_Renderer* renderer
 	SDL_FreeSurface(bitmapSurface);
 
 	// return the number of textures
-	return AL_Size(tex->textures);
+	return ListSize(tex->textures);
 }
 
 
-void Textures_Destroy(Textures *tex){
+void DestroyTextures(Textures *tex){
 	// remove all of the textures from the list
-	SDL_Texture* texture = AL_RemoveLast(tex->textures);
+	SDL_Texture* texture = ListRemoveLast(tex->textures);
 	while (texture != NULL)
 	{
 		SDL_DestroyTexture(texture);
-		texture = AL_RemoveLast(tex->textures);
+		texture = ListRemoveLast(tex->textures);
 	}
 	// free the list
 	// note only works if the list size is 0
-	AL_Destroy(tex->textures);
+	ListDestroy(tex->textures);
 	// free the container
 	free(tex);
 }
 
 // get the specific texture requested
-SDL_Texture* Textures_Get(Textures *tex, texture_id_type id){
-	return AL_Get(tex->textures, id);
+SDL_Texture* TexturesGet(Textures *tex, texture_id_type id){
+	return ListGet(tex->textures, id);
 }

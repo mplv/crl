@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "arraylist.h"
 
-void AL_Resize(ArrayList *l)
+static void resize(ArrayList *l)
 {
     // TODO works but could be shortened
     // make a copy of the pointer
@@ -29,23 +29,25 @@ void AL_Resize(ArrayList *l)
 
 // Remember that you must remove all elements before using this function
 // or it does nothing and you leak a bunch of data
-void AL_Destroy(ArrayList *l)
+int ListDestroy(ArrayList *l)
 {
     // as long as there are 0 elements
-    if (AL_Size(l) == 0)
+    if (ListSize(l) == 0)
     {
         // free the array
         free(l->arr);
         // also free the list
         free(l);
+        return 0;
     }
+    return 1;
 }
 
-void* AL_Get(ArrayList *l, int pos)
+void* ListGet(ArrayList *l, int pos)
 {
     // because AL_Size returns an int 1 higher than the next empty pos
     // this check makes sure that the pos is indeed populated with an element
-    if (pos > -1 && AL_Size(l) > pos)
+    if (pos > -1 && ListSize(l) > pos)
     {
         // return that element
         void *ret = l->arr[pos];
@@ -55,7 +57,15 @@ void* AL_Get(ArrayList *l, int pos)
     return NULL;
 }
 
-ArrayList* AL_New()
+void* ListPeek(ArrayList *l)
+{
+	if (l->addPos > 0) {
+		return l->arr[l->addPos-1];
+	}
+	return NULL;
+}
+
+ArrayList* NewList()
 {
     // create a new list
     ArrayList *l = calloc(1, sizeof(ArrayList));
@@ -67,18 +77,18 @@ ArrayList* AL_New()
     return l;
 }
 
-int AL_Size(ArrayList *l)
+int ListSize(ArrayList *l)
 {
     // 1 higher than the actual size like java
     return l->addPos;
 }
 
-void AL_Add(ArrayList *l, void* data)
+void ListAdd(ArrayList *l, void* data)
 {
     // if we are at the end of the array resize
     if (l->addPos == l->cap)
     {
-        AL_Resize(l);
+        resize(l);
     }
     // now add it
     l->arr[l->addPos] = data;
@@ -86,10 +96,14 @@ void AL_Add(ArrayList *l, void* data)
 
 }
 
-void* AL_RemoveLast(ArrayList *l)
+void ListPush(ArrayList *l, void* data) {
+	ListAdd(l,data);
+}
+
+void* ListRemoveLast(ArrayList *l)
 {
     // as long as there are elements
-    if (AL_Size(l) > 0)
+    if (ListSize(l) > 0)
     {
         // get the last element
         // p.s. l->addPos is pointing to empty pos
@@ -105,7 +119,11 @@ void* AL_RemoveLast(ArrayList *l)
     return NULL;
 }
 
-void* AL_Remove(ArrayList *l, int pos)
+void* ListPop(ArrayList *l){
+	return ListRemoveLast(l);
+}
+
+void* ListRemove(ArrayList *l, int pos)
 {
     // as long as the pos to remove is less than the cap and add pos
     if (pos < l->cap && pos < l->addPos) {
@@ -117,11 +135,10 @@ void* AL_Remove(ArrayList *l, int pos)
             // if the next position is less than the cap
             if (i+1 < l->cap) {
                 l->arr[i] = l->arr[i+1];
-            } else { //otherwise
-                l->arr[i] = NULL;
-                l->addPos -= 1;
             }
         }
+	// dec the add position so that size works correctly
+	l->addPos -= 1;
         // return the data or NULL
         return data;
     }

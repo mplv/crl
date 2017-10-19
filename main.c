@@ -96,7 +96,7 @@ int main (int argc, const char *argv[])
 	// PUT conf load here for window size
 	// load the config file
 	//TODO use the base path
-	RL_Config* conf = RL_LoadConfig(base_path,"data/conf.txt");
+	Config* conf = LoadConfig(base_path,"data/conf.txt");
 	if (conf == NULL) {
 		printf("Config not loaded quitting...\n");
 		IMG_Quit();
@@ -127,7 +127,7 @@ int main (int argc, const char *argv[])
 
 	// create the structure for the textures
 	err = SDL_Init(SDL_INIT_VIDEO);
-    Textures *textures = Textures_New();
+    Textures *textures = NewTextures();
 	if (textures == NULL) {
 		SDL_free(base_path);
 		printf("Could not create textures\n");
@@ -139,43 +139,43 @@ int main (int argc, const char *argv[])
 	}
 
 	// after creating space for the textures load them
-	int loaded = Textures_Load(textures, base_path, renderer);
+	int loaded = LoadTextures(textures, base_path, renderer);
 	if (loaded <= 0 && loaded != NUM_TEXTURES) {
 		SDL_free(base_path);
-		Textures_Destroy(textures);
+		DestroyTextures(textures);
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
 		IMG_Quit();
 		SDL_Quit();
 		printf("Textures not loaded\n");
-		return -1;
+		exit(6);
 	}
 
 	// create a runtime context
-	RL_RTContext *rtc = RL_CreateRTContext();
+	Context *rtc = CreateRTContext();
 	rtc->conf = conf;
 	// set the textures
 	rtc->textures = textures;
 
 	// create a map
-	rtc->mapGenHolder = RL_CreateMapGenerator();
+	rtc->mapGenHolder = CreateMapGenerator();
 	if (!rtc->mapGenHolder)
 	{
 		SDL_free(base_path);
-		RL_FreeGenerator(rtc->gen);
-		Textures_Destroy(textures);
-		RL_FreeConfig(rtc->conf);
-		RL_FreeRTContext(rtc);
+		DestroyRandom(rtc->gen);
+		DestroyTextures(textures);
+		FreeConfig(rtc->conf);
+		FreeRTContext(rtc);
 		SDL_DestroyRenderer(renderer);
 		SDL_DestroyWindow(window);
 		IMG_Quit();
 		SDL_Quit();
 		printf("Map generator could not be allocated quitting...\n");
-		return -1;
+		exit(7);
 	}
 
-	RL_MapGeneratorAdd(rtc->mapGenHolder,&RL_CreateForestMap);
-	RL_MapGeneratorAdd(rtc->mapGenHolder,&RL_CreateCaveMap);
+	MapGeneratorAdd(rtc->mapGenHolder,&CreateForestMap);
+	MapGeneratorAdd(rtc->mapGenHolder,&CreateCaveMap);
 
 	// if this is the first time the game is being run
 	// set the generator seed
@@ -183,11 +183,23 @@ int main (int argc, const char *argv[])
 	if (rtc->conf->gen == -1)
 	{
 		rtc->conf->gen = time(NULL);
-		rtc->gen = RL_GeneratorNew();
+		rtc->gen = NewRandom(rtc->conf->gen);
 	}
 	else
 	{
-		RL_LoadSave(rtc);
+		int err = LoadSave(rtc);
+		if (err != 0) {
+			SDL_free(base_path);
+			DestroyRandom(rtc->gen);
+			DestroyTextures(textures);
+			FreeConfig(rtc->conf);
+			FreeRTContext(rtc);
+			SDL_DestroyRenderer(renderer);
+			SDL_DestroyWindow(window);
+			IMG_Quit();
+			SDL_Quit();
+			exit(8);
+		}
 		saveNotLoaded = 0;
 	}
 
@@ -196,19 +208,19 @@ int main (int argc, const char *argv[])
 	// TODO this requires dirent not sure if it can be used on windows
 	// might just be better to open a file with a list of creatures and
 	// loop through that to get the data files
-	rtc->creatures = RL_LoadAllCreatures(rtc->conf);
+	rtc->creatures = LoadAllCreatures(rtc->conf);
 
 	if (saveNotLoaded) {
 		// generate a map
-		rtc->map = RL_GenerateMap(rtc->mapGenHolder, rtc->conf->mapsizex, rtc->conf->mapsizey, rtc->gen);
+		rtc->map = GenerateMap(rtc->mapGenHolder, rtc->conf->mapsizex, rtc->conf->mapsizey, rtc->gen);
 		// create a player
-		rtc->player = RL_NewPlayer();
+		rtc->player = NewPlayer();
 		// set player color
 		// TODO get values from config?
 		rtc->player->ent->r = 255;
 		rtc->player->ent->g = 10;
 		rtc->player->ent->b = 50;
-		RL_PopulateMap(rtc->map, rtc->creatures);
+		PopulateMap(rtc->map, rtc->creatures);
 	}
 
 
@@ -218,14 +230,14 @@ int main (int argc, const char *argv[])
 	// for different screens
 	// TODO add the other screens
 	GameInputStateHolder *gameInputStateHolder = GIS_NewHolder();
-	GameInputState *main_screen = GIS_Main_State_New();
+	GameInputState *main_screen = GIS_MainStateNew();
 	gameInputStateHolder->Register(gameInputStateHolder, main_screen);
 
 
 	// inital draw
 	SDL_SetRenderDrawColor(renderer,0,0,0,255);
 	SDL_RenderClear(renderer);
-	RL_Draw(rtc,renderer);
+	Draw(rtc,renderer);
 	SDL_RenderPresent(renderer);
 
 	// event loop
@@ -258,23 +270,23 @@ int main (int argc, const char *argv[])
 		// draw here so that when running in "real time" it will update the screen
 		SDL_SetRenderDrawColor(renderer,0,0,0,255);
 		SDL_RenderClear(renderer);
-		RL_Draw(rtc,renderer);
+		Draw(rtc,renderer);
 		SDL_RenderPresent(renderer);
 	}
 	// TODO save here
-	RL_Save(rtc);
+	Save(rtc);
 
 	// start clean up
 	SDL_free(base_path);
 	GIS_FreeHolder(gameInputStateHolder);
-	Textures_Destroy(textures);
-	RL_FreeCreaturesList(rtc->creatures);
-	RL_DestroyPlayer(rtc->player);
-	RL_DestroyMap(rtc->map, rtc->conf->mapsizex);
-	RL_DestroyMapGenerator(rtc->mapGenHolder);
-	RL_FreeGenerator(rtc->gen);
-	RL_FreeConfig(rtc->conf);
-	RL_FreeRTContext(rtc);
+	DestroyTextures(textures);
+	FreeCreaturesList(rtc->creatures);
+	DestroyPlayer(rtc->player);
+	DestroyMap(rtc->map, rtc->conf->mapsizex);
+	DestroyMapGenerator(rtc->mapGenHolder);
+	DestroyRandom(rtc->gen);
+	FreeConfig(rtc->conf);
+	FreeRTContext(rtc);
 
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);

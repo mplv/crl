@@ -7,13 +7,32 @@ typedef struct {
     void **arr;
 } ArrayList;
 
-ArrayList* AL_New();
-void AL_Add(ArrayList *l, void* data);
-void* AL_Remove(ArrayList *l, int pos);
-void* AL_RemoveLast(ArrayList *l);
-int AL_Size(ArrayList *l);
-void AL_Destroy(ArrayList *l);
-void* AL_Get(ArrayList *l, int pos);
+// Create an arraylist
+ArrayList* NewList();
 
+// add an element to the array list
+// note: that the user of this data structure
+// must have ownership of the data
+void ListAdd(ArrayList *l, void* data);
+void ListPush(ArrayList *l, void* data);
+
+// remove an element from position pos in list
+void* ListRemove(ArrayList *l, int pos);
+
+// remove the last element in the list
+// note: this allows a stack like operation
+// of the list
+void* ListRemoveLast(ArrayList *l);
+void* ListPop(ArrayList *l);
+
+// get the size of the list
+int ListSize(ArrayList *l);
+
+// destroy the list structure
+int ListDestroy(ArrayList *l);
+
+// get an element at a certain position
+void* ListGet(ArrayList *l, int pos);
+void* ListPeek(ArrayList *l);
 
 #endif /* arraylist_h */

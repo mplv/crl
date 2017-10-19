@@ -18,12 +18,12 @@ typedef struct {
 	texture_id_type texture;
 	// color of the text for the sprite
     unsigned int r,g,b;
-}RL_Entity;
+}Entity;
 
-RL_Entity* RL_NewEntity();
-void RL_DestroyEntity(RL_Entity *rtc);
-void RL_EntityMove(RL_Entity *ent, int dir, int maxX, int maxY);
-void RL_EntitySave(FILE* f, RL_Entity* e);
-void RL_EntityLoad(FILE* f, RL_Entity* e);
+Entity* NewEntity();
+void DestroyEntity(Entity *ent);
+void EntityMove(Entity *ent, int dir, int maxX, int maxY);
+void EntitySave(FILE* f, Entity* e);
+void EntityLoad(FILE* f, Entity* e);
 
 #endif /* entity_h */

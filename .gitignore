@@ -10,3 +10,6 @@ Makefile
 img/
 core
 gmon*
+.vscode
+.*DS_Store*
+.gitmodules

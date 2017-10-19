@@ -1,5 +1,6 @@
 #include "draw.h"
 #include <SDL2/SDL.h>
+#include "debug/debug.h"
 #include "entity/creature/creature.h"
 #include "textures/textures.h"
 #include "runtimecontext/runtimecontext.h"
@@ -31,7 +32,7 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	printf("%d\n", O);
 }*/
 
-void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
+void Draw(Context *rtc, SDL_Renderer *renderer) {
 	int cx = 0;
 	int cy = 0;
 
@@ -74,12 +75,12 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 		for (j = cx; j < cx+rtc->conf->widthToTiles; j++) {
 			dstRect.x = j*rtc->conf->tileWidth-cx*rtc->conf->tileWidth;
 			dstRect.y = i*rtc->conf->tileHeight-cy*rtc->conf->tileHeight;
-			tex = Textures_Get(rtc->textures,rtc->map->map[j][i]);
+			tex = TexturesGet(rtc->textures,rtc->map->map[j][i]);
 			if (tex == NULL) {
 				printf("Texture %d not availible\n", rtc->map->map[j][i]);
 				break;
 			}
-			rtc->map->GetColor(rtc->map,rgbMod,rtc->map->map[j][i]);
+			MapGetColor(rtc->map,rgbMod,rtc->map->map[j][i]);
 			SDL_SetTextureColorMod(tex,rgbMod[0],rgbMod[1],rgbMod[2]);
 			SDL_RenderCopy(renderer,tex,NULL,&dstRect);
 			SDL_SetTextureColorMod(tex,255,255,255);
@@ -87,11 +88,11 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	}
 
 	// for _, e := range GameState.MonsterList {}
-	int numCreatures = AL_Size(rtc->creatures);
+	int numCreatures = ListSize(rtc->map->creatures);
 	for (i = 0; i < numCreatures; i++) {
 		// draw creatures and color them
 		// assuming that they are visible in the camera
-		RL_Creature* creature = AL_Get(rtc->creatures, i);
+		Creature* creature = ListGet(rtc->map->creatures, i);
 		if (creature->ent.x >= cx && creature->ent.x < cx+rtc->conf->widthToTiles &&
 			creature->ent.y >= cy && creature->ent.y < cy+rtc->conf->heightToTiles) {
 				// blank out the tile behind the creature
@@ -103,9 +104,9 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 				// tex = textures.GetTile('@')
 				dstRect.x = (creature->ent.x - cx) * rtc->conf->tileWidth;
 				dstRect.y = (creature->ent.y - cy) * rtc->conf->tileWidth;
-				tex = Textures_Get(rtc->textures,creature->ent.texture);
+				tex = TexturesGet(rtc->textures,creature->ent.texture);
 				if (tex == NULL) {
-					printf("Texture %d not availible\n", AT);
+					printf("Texture %d not availible\n", creature->ent.texture);
 				}
 				SDL_SetTextureColorMod(tex,creature->ent.r,creature->ent.g,creature->ent.b);
 				SDL_RenderCopy(renderer,tex,NULL,&dstRect);
@@ -122,9 +123,11 @@ void RL_Draw(RL_RTContext *rtc, SDL_Renderer *renderer) {
 	// tex = textures.GetTile('@')
 	dstRect.x = (rtc->player->ent->x - cx) * rtc->conf->tileWidth;
 	dstRect.y = (rtc->player->ent->y - cy) * rtc->conf->tileWidth;
-	tex = Textures_Get(rtc->textures,rtc->player->ent->texture);
+	tex = TexturesGet(rtc->textures,rtc->player->ent->texture);
 	if (tex == NULL) {
-		printf("Texture %d not availible\n", AT);
+		DebugMessageStart(WARNING);
+		printf("Texture %d not availible", AT);
+		DebugMessageEnd();
 	}
 	SDL_SetTextureColorMod(tex,rtc->player->ent->r,rtc->player->ent->g,rtc->player->ent->b);
 	SDL_RenderCopy(renderer,tex,NULL,&dstRect);

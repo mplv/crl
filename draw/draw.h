@@ -4,6 +4,6 @@
 #include <SDL2/SDL.h>
 #include "runtimecontext/runtimecontext.h"
 
-void RL_Draw(RL_RTContext*,SDL_Renderer*);
+void Draw(Context*,SDL_Renderer*);
 
 #endif

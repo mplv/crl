@@ -8,7 +8,7 @@
 #include "debug/debug.h"
 
 // print out the creature for memory corruption or loading issues
-void RL_PrintCreature(RL_Creature *c)
+void PrintCreature(Creature *c)
 {
     printf("%s:\n\t",c->name);
     printf("pre: %d\n\t",c->pre);
@@ -18,15 +18,16 @@ void RL_PrintCreature(RL_Creature *c)
 	printf("evn: %d\n",c->ent.evn);
 	printf("lck: %d\n",c->ent.lck);
     printf("droptable: %d\n\t",c->droptable);
-    printf("climate: %c\n\t",c->climate);
+    printf("climate: %d\n\t",c->climate);
+	printf("ai: %c\n\t",c->ai);
     printf("r,g,b: %u,%u,%u\n",c->ent.r,c->ent.g,c->ent.b);
 }
 
 // load the creature from a file
-RL_Creature* RL_LoadCreatureDef(char *filestr)
+Creature* LoadCreatureDef(char *filestr)
 {
     // allocate the creature
-    RL_Creature *c = calloc(1,sizeof(RL_Creature));
+    Creature *c = calloc(1,sizeof(Creature));
 	c->name = calloc(20,sizeof(char));
     FILE *f;
     f = fopen(filestr, "r");
@@ -43,7 +44,8 @@ RL_Creature* RL_LoadCreatureDef(char *filestr)
         fscanf(f, "lck: %d\n",&c->ent.lck);
 		fscanf(f, "texture: %d\n",&tex);
         fscanf(f, "droptable: %d\n",&c->droptable);
-        fscanf(f, "climate: %c\n",&c->climate);
+        fscanf(f, "climate: %d\n",(int*)(&c->climate));
+		fscanf(f, "ai: %c", &c->ai);
         fscanf(f, "color: %u,%u,%u\n",&c->ent.r,&c->ent.g,&c->ent.b);
 		c->ent.maxHp = c->ent.hp;
 		c->ent.texture = tex;
@@ -63,15 +65,16 @@ RL_Creature* RL_LoadCreatureDef(char *filestr)
     return c;
 }
 
-void RL_CreatureSave(FILE *f, RL_Creature* c){
+void CreatureSave(FILE *f, Creature* c){
 	fprintf(f, "%s\n", c->name);
 	fprintf(f, "%d\n", c->pre);
-	RL_EntitySave(f,&c->ent);
+	EntitySave(f,&c->ent);
 	fprintf(f, "%d\n", c->droptable);
-	fprintf(f, "%c\n", c->climate);
+	fprintf(f, "%d\n", c->climate);
+	fprintf(f, "%c\n", c->ai);
 }
 
-void RL_CreatureListSave(ArrayList* l, const char *base_path)
+void CreatureListSave(ArrayList* l, const char *base_path)
 {
 	const char *save_loc = "data/save/creatures.txt";
 	int basePathLen = 0;
@@ -87,34 +90,36 @@ void RL_CreatureListSave(ArrayList* l, const char *base_path)
 		save_path[i + basePathLen] = save_loc[i];
 	}
 	save_path[basePathLen+saveLocLen] = '\0';
-	RL_DebugMessage(LOG, save_path);
+    DebugMessageStart(LOG);
+	printf("%s", save_path);
+    DebugMessageEnd();
 	FILE *f = fopen(save_path, "w");
 	if (f) {
-		fprintf(f, "%d\n", AL_Size(l));
-		RL_Creature* creature = AL_RemoveLast(l);
-		while (creature != NULL) {
-			RL_CreatureSave(f,creature);
-			free(creature->name);
-			free(creature);
-			creature = AL_RemoveLast(l);
+		fprintf(f, "%d\n", ListSize(l));
+		i = 0;
+		int size = ListSize(l);
+		for(;i<size;i++)
+		{
+			CreatureSave(f,ListGet(l,i));
 		}
 		fclose(f);
 	}
 	free(save_path);
 }
 
-void RL_CreatureLoad(FILE *f, RL_Creature* c){
+void CreatureLoad(FILE *f, Creature* c){
 	fgets(c->name, 20, f);
 	fscanf(f," ");
 	fscanf(f, "%d\n", &c->pre);
-	RL_EntityLoad(f,&c->ent);
+	EntityLoad(f,&c->ent);
 	fscanf(f, "%d\n", &c->droptable);
-	fscanf(f, "%c\n", &c->climate);
+	fscanf(f, "%d\n", (int*)(&c->climate));
+	fscanf(f, "%c\n", &c->ai);
 }
 
-ArrayList* RL_CreatureListLoad(const char *base_path)
+ArrayList* CreatureListLoad(const char *base_path)
 {
-	ArrayList *l = AL_New();
+	ArrayList *l = NewList();
 	const char *load_loc = "data/save/creatures.txt";
 	int basePathLen = 0;
 	int loadLocLen = 0;
@@ -130,16 +135,19 @@ ArrayList* RL_CreatureListLoad(const char *base_path)
 		load_path[i + basePathLen] = load_loc[i];
 	}
 	load_path[basePathLen+loadLocLen] = '\0';
-	RL_DebugMessage(LOG, load_path);
+    DebugMessageStart(LOG);
+	printf("%s", load_path);
+    DebugMessageEnd();
 	FILE *f = fopen(load_path, "r");
 	if (f) {
 		fscanf(f,"%d\n",&num);
-		RL_Creature *c;
+		Creature *c;
 		while (num > 0) {
-			c = calloc(1, sizeof(RL_Creature));
+			c = calloc(1, sizeof(Creature));
 			c->name = calloc(20,sizeof(char));
-			RL_CreatureLoad(f,c);
-			AL_Add(l,c);
+			c->nameAllocd = 1;
+			CreatureLoad(f,c);
+			ListAdd(l,c);
 			num--;
 		}
 		fclose(f);
@@ -149,9 +157,9 @@ ArrayList* RL_CreatureListLoad(const char *base_path)
 }
 
 // only on *nix boxes can we find the creatures
-ArrayList* RL_LoadAllCreatures(RL_Config *c)
+ArrayList* LoadAllCreatures(Config *c)
 {
-    ArrayList *l = AL_New();
+    ArrayList *l = NewList();
     // open the directory holding the creatures
     DIR *d = NULL;
     struct dirent *dir;
@@ -167,11 +175,11 @@ ArrayList* RL_LoadAllCreatures(RL_Config *c)
             {
                 // modify the path so that we can load the creatures
                 strncpy(path + 15, dir->d_name, 32);
-                RL_Creature *creature = RL_LoadCreatureDef(path);
+                Creature *creature = LoadCreatureDef(path);
                 // add the creature to the list
                 if (creature)
                 {
-                    AL_Add(l,creature);
+                    ListAdd(l,creature);
                 }
 				else {
 					closedir(d);
@@ -188,11 +196,12 @@ ArrayList* RL_LoadAllCreatures(RL_Config *c)
 }
 
 // free all of the creatures stored in the creature arraylist
-void RL_FreeCreaturesList(ArrayList *l)
+void FreeCreaturesList(ArrayList *l)
 {
-    while (AL_Size(l) > 0) {
-        RL_Creature *c = (RL_Creature*)AL_RemoveLast(l);
+    while (ListSize(l) > 0) {
+        Creature *c = (Creature*)ListRemoveLast(l);
+		free(c->name);
         free(c);
     }
-	AL_Destroy(l);
+	ListDestroy(l);
 }

@@ -4,7 +4,7 @@
 // NOTE that this is read only once in the event loop
 // This structure will be passed to nearly all of the games
 // functions! Do not miss use
-typedef struct _RL_Config {
+typedef struct _Config {
 	// this makes the structure read only if set
 	char readonly;
 	char* path;
@@ -23,8 +23,8 @@ typedef struct _RL_Config {
 	int mapsizex;
 	int mapsizey;
 
-} RL_Config;
+} Config;
 
-RL_Config* RL_LoadConfig(const char *base_path,const char *configFilePath);
-void RL_FreeConfig(RL_Config *config);
+Config* LoadConfig(const char *base_path,const char *configFilePath);
+void FreeConfig(Config *config);
 #endif
