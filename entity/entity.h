@@ -17,7 +17,7 @@ typedef struct {
     int mst;
 	texture_id_type texture;
 	// color of the text for the sprite
-    unsigned int r,g,b;
+    int r,g,b;
 }Entity;
 
 Entity* NewEntity();

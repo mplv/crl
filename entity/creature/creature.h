@@ -20,7 +20,7 @@ typedef struct {
 
 	// which ai to use
 	// noted in ai.h
-	char ai;
+	int ai;
 
 	int nameAllocd;
 } Creature;

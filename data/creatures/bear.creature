@@ -7,6 +7,8 @@ evn:    10
 lck:    25
 texture:	34
 droptable:  0
-climate:    f
-ai:	i
-color:  255,166,0
+climate:    0
+ai:	0
+r:  255
+g: 166
+b: 0

@@ -12,15 +12,16 @@ void PrintCreature(Creature *c)
 {
     printf("%s:\n\t",c->name);
     printf("pre: %d\n\t",c->pre);
-	printf("hp: %d\n",c->ent.hp);
-	printf("atk: %d\n",c->ent.atk);
-	printf("def: %d\n",c->ent.def);
-	printf("evn: %d\n",c->ent.evn);
-	printf("lck: %d\n",c->ent.lck);
+	printf("hp: %d\n\t",c->ent.hp);
+	printf("atk: %d\n\t",c->ent.atk);
+	printf("def: %d\n\t",c->ent.def);
+	printf("evn: %d\n\t",c->ent.evn);
+	printf("lck: %d\n\t",c->ent.lck);
+    printf("texture: %d\n\t", c->ent.texture);
     printf("droptable: %d\n\t",c->droptable);
     printf("climate: %d\n\t",c->climate);
-	printf("ai: %c\n\t",c->ai);
-    printf("r,g,b: %u,%u,%u\n",c->ent.r,c->ent.g,c->ent.b);
+	printf("ai: %d\n\t",c->ai);
+    printf("r,g,b: %d,%d,%d\n",c->ent.r,c->ent.g,c->ent.b);
 }
 
 // load the creature from a file
@@ -45,11 +46,13 @@ Creature* LoadCreatureDef(char *filestr)
 		fscanf(f, "texture: %d\n",&tex);
         fscanf(f, "droptable: %d\n",&c->droptable);
         fscanf(f, "climate: %d\n",(int*)(&c->climate));
-		fscanf(f, "ai: %c", &c->ai);
-        fscanf(f, "color: %u,%u,%u\n",&c->ent.r,&c->ent.g,&c->ent.b);
+		fscanf(f, "ai: %d\n", &c->ai);
+        fscanf(f, "r: %d\n",&(c->ent.r));
+        fscanf(f, "g: %d\n",&(c->ent.g));
+        fscanf(f, "b: %d\n",&(c->ent.b));
 		c->ent.maxHp = c->ent.hp;
 		c->ent.texture = tex;
-        // do things is pre is > version
+        // TODO do things is pre is > version
     }
     else
     {
@@ -71,7 +74,7 @@ void CreatureSave(FILE *f, Creature* c){
 	EntitySave(f,&c->ent);
 	fprintf(f, "%d\n", c->droptable);
 	fprintf(f, "%d\n", c->climate);
-	fprintf(f, "%c\n", c->ai);
+	fprintf(f, "%d\n", c->ai);
 }
 
 void CreatureListSave(ArrayList* l, const char *base_path)
@@ -114,7 +117,7 @@ void CreatureLoad(FILE *f, Creature* c){
 	EntityLoad(f,&c->ent);
 	fscanf(f, "%d\n", &c->droptable);
 	fscanf(f, "%d\n", (int*)(&c->climate));
-	fscanf(f, "%c\n", &c->ai);
+	fscanf(f, "%d\n", &c->ai);
 }
 
 ArrayList* CreatureListLoad(const char *base_path)

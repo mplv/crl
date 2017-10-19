@@ -61,7 +61,7 @@
 
 int main (int argc, const char *argv[])
 {
-	if (getuid()==0){
+	if (getuid() == 0) {
 		printf("Running this program as root is unsafe.\nDo not run this program as root!\n");
 		exit(EXIT_FAILURE);
 	}
