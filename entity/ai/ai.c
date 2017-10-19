@@ -1,24 +1,24 @@
 #include "ai.h"
 
-void AIRun(ArrayList* creatures) {
+void AIRun(ArrayList* creatures, Map *m, Random* gen) {
 	int i = 0;
 	int size = ListSize(creatures);
 	for(i = 0 ; i < size; i++)
 	{
 		Creature *c = ListGet(creatures,i);
 		switch (c->ai) {
-			case 'i':
+			case 0: // INDIVIDUAL
 			// call INDIVIDUAL ai routine here
-			AIIndividualMove(c);
+			AI_IndividualMove(c, m, gen);
 			break;
 
-			case 'g': // group
+			case 1: // group
 			break;
 
-			case 's': // stealth
+			case 2: // stealth
 			break;
 
-			case 'n': // no move till close
+			case 3: // no move till close
 			break;
 
 			default:

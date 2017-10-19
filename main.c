@@ -16,6 +16,7 @@
 #include "debug/debug.h"
 #include "gameinputstate/gameinputstate.h"
 #include "draw/draw.h"
+#include "entity/ai/ai.h"
 
 // TODO data structure for data of game so that refs are just numbers not pointers
 //		perhaps static arrays for base items and stuff.  Random items generated
@@ -261,6 +262,7 @@ int main (int argc, const char *argv[])
 					// do stuff
 					gameInputStateHolder->Do(gameInputStateHolder,rtc,event.key.keysym.sym);
 					// move the creatures around?
+					AIRun(rtc->map->creatures, rtc->map, rtc->gen);
 					break;
 				case SDL_QUIT:
 					running = 0;
