@@ -62,5 +62,9 @@ void DestroyMapGenerator(MapGenerator *mg);
 void MapGeneratorAdd(MapGenerator* mg, Map* (*MAPCreate)(int, int, Random *));
 Map *GenerateMap(MapGenerator* mg, int w, int h, Random* gen);
 
+// map coloring functions
+void ForestGetColors(Map *m, unsigned char rgb[3], texture_id_type id);
+void CaveGetColors(Map *m, unsigned char rgb[3], texture_id_type id);
+
 
 #endif /* map_h */

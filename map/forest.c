@@ -2,7 +2,7 @@
 #include <string.h>
 
 // give the map some color
-void Forest_GetColors(Map *m, unsigned char rgb[3], texture_id_type id)
+void ForestGetColors(Map *m, unsigned char rgb[3], texture_id_type id)
 {
 	switch (id) {
 		case CAP_T:
@@ -30,6 +30,17 @@ void Forest_GetColors(Map *m, unsigned char rgb[3], texture_id_type id)
 		rgb[1] = 98;
 		rgb[2] = 0;
 		break;
+		case DOT:
+		rgb[0] = 102;
+		rgb[1] = 45;
+		rgb[2] = 3;
+		break;
+		/*
+		case DOT:
+		rgb[0] = 60;
+		rgb[1] = 155;
+		rgb[2] = 43;
+		break;*/
 		default:
 		rgb[0] = 255;
 		rgb[1] = 255;

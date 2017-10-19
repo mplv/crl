@@ -236,57 +236,10 @@ void MapGetColor(Map *m, unsigned char rgb[3], texture_id_type id)
 	switch (m->climate) {
 
 		case CAVE:
-		switch (id) {
-			case DOT:
-			rgb[0] = 120;
-			rgb[1] = 120;
-			rgb[2] = 120;
-			break;
-			case POUND:
-			rgb[0] = 230;
-			rgb[1] = 230;
-			rgb[2] = 230;
-			break;
-			default:
-			rgb[0] = 255;
-			rgb[1] = 255;
-			rgb[2] = 255;
-			break;
-		}
+			CaveGetColors(m,rgb,id);
 		break;
 		case FOREST:
-		switch (id) {
-			case CAP_T:
-			rgb[0] = 0;
-			rgb[1] = 218;
-			rgb[2] = 0;
-			break;
-			case EXCLAIMATION:
-			rgb[0] = 0;
-			rgb[1] = 255;
-			rgb[2] = 0;
-			break;
-			case CAP_I:
-			rgb[0] = 0;
-			rgb[1] = 161;
-			rgb[2] = 84;
-			break;
-			case CAP_O:
-			rgb[0] = 99;
-			rgb[1] = 99;
-			rgb[2] = 99;
-			break;
-			case O:
-			rgb[0] = 148;
-			rgb[1] = 98;
-			rgb[2] = 0;
-			break;
-			default:
-			rgb[0] = 255;
-			rgb[1] = 255;
-			rgb[2] = 255;
-			break;
-		}
+			ForestGetColors(m,rgb,id);
 		break;
 		default:
 		rgb[0] = 255;

@@ -2,7 +2,7 @@
 #include <string.h>
 
 // color the map
-void Cave_GetColors(Map *m, unsigned char rgb[3], texture_id_type id)
+void CaveGetColors(Map *m, unsigned char rgb[3], texture_id_type id)
 {
 	switch (id) {
 		case DOT:
