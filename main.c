@@ -261,8 +261,9 @@ int main (int argc, const char *argv[])
 					}
 					// do stuff
 					gameInputStateHolder->Do(gameInputStateHolder,rtc,event.key.keysym.sym);
-					// move the creatures around?
-					AIRun(rtc->map->creatures, rtc->map, rtc->gen);
+					// move the creatures around? only if char moved
+					if (event.key.keysym.sym == SDLK_w || event.key.keysym.sym == SDLK_a|| event.key.keysym.sym == SDLK_s||event.key.keysym.sym == SDLK_d)
+						AIRun(rtc->map->creatures, rtc->player, rtc->map, rtc->gen);
 					break;
 				case SDL_QUIT:
 					running = 0;

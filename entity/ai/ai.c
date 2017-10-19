@@ -1,6 +1,6 @@
 #include "ai.h"
 
-void AIRun(ArrayList* creatures, Map *m, Random* gen) {
+void AIRun(ArrayList* creatures, Player *p, Map *m, Random* gen) {
 	int i = 0;
 	int size = ListSize(creatures);
 	for(i = 0 ; i < size; i++)
@@ -9,7 +9,7 @@ void AIRun(ArrayList* creatures, Map *m, Random* gen) {
 		switch (c->ai) {
 			case 0: // INDIVIDUAL
 			// call INDIVIDUAL ai routine here
-			AI_IndividualMove(c, m, gen);
+			AI_IndividualMove(c, p, m, gen);
 			break;
 
 			case 1: // group

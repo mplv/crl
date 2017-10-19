@@ -10,19 +10,19 @@ InputState_t GIS_MainStateDo(Context *rtc, SDL_Keycode code) {
 	int dir = 0;
 	switch (code) {
 		case SDLK_w:
-			valid = ValidMove(rtc->map, rtc->player->ent, 0);
+			valid = ValidMove(rtc->map, rtc->player, rtc->player->ent, 0);
 			dir = 0;
 			break;
 		case SDLK_a:
-			valid = ValidMove(rtc->map, rtc->player->ent, 2);
+			valid = ValidMove(rtc->map, rtc->player, rtc->player->ent, 2);
 			dir = 2;
 			break;
 		case SDLK_s:
-			valid = ValidMove(rtc->map, rtc->player->ent, 1);
+			valid = ValidMove(rtc->map, rtc->player, rtc->player->ent, 1);
 			dir = 1;
 			break;
 		case SDLK_d:
-			valid = ValidMove(rtc->map, rtc->player->ent, 3);
+			valid = ValidMove(rtc->map, rtc->player, rtc->player->ent, 3);
 			dir = 3;
 			break;
 		case SDLK_c:

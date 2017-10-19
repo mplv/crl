@@ -178,7 +178,7 @@ void DestroyMap(Map *m, int w)
 }
 
 // Check for a valid move based on a map, entity and a directon of movement
-int ValidMove(Map *m, Entity *ent, int dir)
+int ValidMove(Map *m, Player* p, Entity *ent, int dir)
 {
     int b = 1;
     int i = 0;
@@ -214,10 +214,19 @@ int ValidMove(Map *m, Entity *ent, int dir)
     }
 
 	// make sure that we are not moving through walls and such
-    for (i = 0; i < m->obstaclesLen; i++) {
+    for (i = 0; i < m->obstaclesLen; i++)
+	{
         if (m->map[x][y] == m->obstacles[i])
             b = 0;
     }
+	for (i=0; i< ListSize(m->creatures); i++)
+	{
+		Creature *c = ListGet(m->creatures, i);
+		if (c->ent.x == x && c->ent.y == y)
+			b = 0;
+	}
+	if (p->ent->x == x && p->ent->y == y)
+		b = 0;
     return b;
 }
 

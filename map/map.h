@@ -3,6 +3,7 @@
 
 #include "textures/textures.h"
 #include "entity/entity.h"
+#include "entity/player/player.h"
 #include "generator/generator.h"
 #include "arraylist/arraylist.h"
 
@@ -47,7 +48,7 @@ typedef struct _MAP_GENERATOR {
 } MapGenerator;
 
 // functions global to all generators
-int ValidMove(Map *m, Entity *ent, int dir);
+int ValidMove(Map *m, Player* p, Entity *ent, int dir);
 void DestroyMap(Map *m, int w);
 void MapSave(Map *map, const char *base_path);
 Map* MapLoad(MapGenerator *mg, const char *base_path);
