@@ -221,7 +221,8 @@ int main (int argc, const char *argv[])
 		rtc->player->ent->r = 255;
 		rtc->player->ent->g = 10;
 		rtc->player->ent->b = 50;
-		PopulateMap(rtc->map, rtc->creatures);
+		PopulateMap(rtc->map, rtc->gen, rtc->creatures);
+		PlayerSpawn(rtc->map, rtc->player, rtc->gen, rtc->creatures);
 	}
 
 

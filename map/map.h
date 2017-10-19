@@ -53,8 +53,9 @@ void DestroyMap(Map *m, int w);
 void MapSave(Map *map, const char *base_path);
 Map* MapLoad(MapGenerator *mg, const char *base_path);
 Map* MapLoadGenerate(MapGenerator* mg, Random* gen, climates_t climate, int w, int h);
-void PopulateMap(Map* m, ArrayList *masterList);
+void PopulateMap(Map* m, Random *gen, ArrayList *masterList);
 void MapGetColor(Map *m, unsigned char rgb[3], texture_id_type id);
+void PlayerSpawn(Map *m, Player* p, Random* gen, ArrayList* creatures);
 
 // map generator holder functions
 MapGenerator* CreateMapGenerator();

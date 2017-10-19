@@ -214,10 +214,8 @@ Map* CreateCaveMap(int w, int h, Random *gen)
 	m->climate = CAVE;
 
 	m->obstaclesLen = 3;
-	m->obstacles = calloc(3, sizeof(texture_id_type));
-	m->obstacles[0] = CAP_O;
-	m->obstacles[1] = CAP_T;
-	m->obstacles[2] = CAP_I;
+	m->obstacles = calloc(1, sizeof(texture_id_type));
+	m->obstacles[0] = POUND;
 	m->sizeX = w;
 	m->sizeY = h;
 

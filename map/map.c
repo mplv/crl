@@ -20,7 +20,8 @@ void MapGeneratorAdd(MapGenerator* mg, Map* (*MAPCreate)(int, int, Random *)) {
 // TODO make it blend maps so that it makes some sense
 Map *GenerateMap(MapGenerator* mg, int w, int h, Random* gen)
 {
-	Map* (*func)(int, int, Random *) = ListGet(mg->list,0);
+	int mapType = gen->GenerateNumber(gen) % ListSize(mg->list);
+	Map* (*func)(int, int, Random *) = ListGet(mg->list,mapType);
 	if (func != NULL) {
 		return func(w,h,gen);
 	}
@@ -128,7 +129,45 @@ Map* MapLoad(MapGenerator *mg, const char *base_path) {
 	return map;
 }
 
-void PopulateMap(Map* m, ArrayList* masterList)
+static int openTile(Map* m, int x, int y)
+{
+	int i = 0;
+	for (i = 0; i < m->obstaclesLen; i++)
+	{
+		if (m->obstacles[i] == m->map[x][y])
+		{
+			return 0;
+		}
+	}
+	return 1;
+}
+
+void PlayerSpawn(Map *m, Player* p, Random* gen, ArrayList* creatures)
+{
+    int foundPosition = 0;
+    int x,y,i;
+    while (!foundPosition) {
+        x = gen->GenerateNumber(gen) % m->sizeX;
+        y = gen->GenerateNumber(gen) % m->sizeY;
+		for (i = 0; i < ListSize(creatures); i++)
+		{
+			Creature *c = ListGet(creatures,i);
+			if (x == c->ent.x && y == c->ent.y)
+			{
+				foundPosition = 0;
+				continue;
+			}
+		}
+        if (openTile(m,x,y))
+        {
+            p->ent->x = x;
+            p->ent->y = y;
+            foundPosition = 1;
+        }
+    }
+}
+
+void PopulateMap(Map* m, Random* gen, ArrayList* masterList)
 {
 	int numberOfCreatures = 10;
 	while(numberOfCreatures > 0)
@@ -141,8 +180,19 @@ void PopulateMap(Map* m, ArrayList* masterList)
 		Creature* creature = calloc(1, sizeof(Creature));
 		memcpy(creature, ListGet(masterList,0), sizeof(Creature));
 		creature->nameAllocd = 0;
-		creature->ent.x = numberOfCreatures;
-		creature->ent.y = numberOfCreatures;
+		int foundPosition = 0;
+		int x,y;
+		while (!foundPosition) {
+			x = gen->GenerateNumber(gen) % m->sizeX;
+			y = gen->GenerateNumber(gen) % m->sizeY;
+			if (openTile(m,x,y))
+			{
+				creature->ent.x = x;
+				creature->ent.y = y;
+				foundPosition = 1;
+			}
+		}
+
 		ListAdd(m->creatures, creature);
 		numberOfCreatures--;
 	}
